@@ -1,17 +1,17 @@
 
-# ITOM -- Industry Transformation Optimization Model
+# ITOM - Industry Transformation Optimization Model
 
-**Welcome to ITOM -- the Industry Transformation Optimization Model framework.**[^1]
+**Welcome to ITOM - the Industry Transformation Optimization Model framework.**[^1]
 
 With this framework you have all the building blocks you need to generate full-fledged systems optimization models that you can apply to explore future pathways for the basic industries.
 
 ITOM is meant for geographically detailed techno-economic bottom-up linear optimization model. It optimises investments in production assets and plant operations, generating cost-optimal pathways towards future production networks in the industrial sectors that you have defined. It can account for single plants or production sites and the infrastructure between them. The minimum total cost solution is constrained by boundary conditions defined by the modeller such as emission limits, waste and scrap availability, and quality requirements for final products.
 
 # Acknowledgement
-- ITOM's structure and philosophy is inspired from **OSeMOSYS -- the Open Source energy MOdelling SYStem** (Howells *et al.*, 2011).[^2]
+- ITOM's structure and philosophy is inspired from **OSeMOSYS - the Open Source energy MOdelling SYStem** (Howells *et al.*, 2011).[^2]
 - The development for this repository was funded in part by:
-	-  the German Federal Ministry for Economic Affairs and Climate Action (BMWK) under Grant Aggreement Number 03EI5003A (research project [GreenFeed -- Green Feedstock for a Sustainable Chemistry](https://wupperinst.org/en/p/wi/p/s/pd/1993)). All responsibility for the content of this repository lies with the authors.
-	- the European Union (EU) under Grant Agreement Number 101137606 (HORIZON EUROPE Research and Innovation Action project [TRANSIENCE -- TRANSItioning towards an Efficient, carbon-Neutral Circular European industry](https://www.transience.eu/)). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Health and Digital Executive Agency (HaDEA). Neither the European Union nor the granting authority can be held responsible for them.
+	-  the German Federal Ministry for Economic Affairs and Climate Action (BMWK) under Grant Aggreement Number 03EI5003A (research project [GreenFeed - Green Feedstock for a Sustainable Chemistry](https://wupperinst.org/en/p/wi/p/s/pd/1993)). All responsibility for the content of this repository lies with the authors.
+	- the European Union (EU) under Grant Agreement Number 101137606 (HORIZON EUROPE Research and Innovation Action project [TRANSIENCE - TRANSItioning towards an Efficient, carbon-Neutral Circular European industry](https://www.transience.eu/)). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Health and Digital Executive Agency (HaDEA). Neither the European Union nor the granting authority can be held responsible for them.
 
 # Installation
  - Download the code from this repository or `git clone` it.
