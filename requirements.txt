@@ -1,0 +1,10 @@
+glpk=4.57 # GNU Linear Programming Kit (solver)
+gurobi=10.0.1 # Interface to gurobi solver
+matplotlib==3.5.2 # Vizualisation library
+numpy=1.24.3 # Array processing for numbers, strings, records, and objects
+pandas=2.0.1 # High-performance, easy-to-use data structures and data analysis tools
+pyomo=6.5.0 # Python Optimization Modeling Objects
+python=3.10.10 # Python programming language
+pyyaml=6.0 # YAML parser and emitter for Python
+unicodecsv==0.14.1 # csv module which supports unicode strings
+xlrd==1.2.0 # reading data and formatting information from Excel files in the historical .xls format
