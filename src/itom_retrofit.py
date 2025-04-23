@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar 19 10:56:18 2020
+This module defines:
+
+    - the `abstract_itom_retrofit` subclass of `abstract_itom`,
+    - the `abstract_itom_hub_retrofit` subclass of `abstract_itom_hub`.
+
+Both classes encapsulate Pyomo ABSTRACT models extending the core ITOM framework definition
+to include the possibility of retrofits in the energy-intensive industry system.
 
 @author: mathieusa
 """
+
+__all__ = ('abstract_itom_retrofit',
+           'abstract_itom_hub_retrofit')
 
 from pyomo.environ import Param, Var, Constraint, NonNegativeReals, value
 from itom import abstract_itom

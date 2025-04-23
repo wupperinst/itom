@@ -6,6 +6,8 @@ This module defines:
     - the `abstract_itom` class that encapsulates a Pyomo ABSTRACT model definition for the energy-intensive industry system,
     - the `concrete_itom` class that encapsulates a Pyomo CONCRETE model built from the abstract model,
     - methods in both classes to import input data from csv, solve the model, export all variables to csv etc.
+
+@author: mathieusa
 '''
 
 __all__ = ('abstract_itom',

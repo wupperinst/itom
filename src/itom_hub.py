@@ -3,13 +3,13 @@
 '''
 This module defines:
 
-    - the `abstract_itom` class that encapsulates a Pyomo ABSTRACT model definition for the energy-intensive industry system,
-    - the `concrete_itom` class that encapsulates a Pyomo CONCRETE model built from the abstract model,
-    - methods in both classes to import input data from csv, solve the model, export all variables to csv etc.
+    - the `abstract_itom_hub` class that encapsulates a Pyomo ABSTRACT model definition for the energy-intensive industry system,
+      where locations are indirectly connected via a transport hub.
+
+@author: mathieusa
 '''
 
-__all__ = ('abstract_itom_hub',
-           'concrete_itom_hub')
+__all__ = ('abstract_itom_hub')
 
 #from __future__ import division
 import os
@@ -26,7 +26,7 @@ class abstract_itom_hub(object):
     In this model a "Transport Hub" links every location to every other location in the same region.
     It allows to build and solve problems with a significant number of locations, which might lead to
     excessively large problems with itom.py
-    
+
     **Constructor arguments:**
         *InputPath [optional]: string*
             Path to directory of csv input data files. Default: None.
