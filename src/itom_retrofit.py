@@ -9,7 +9,7 @@ This module defines:
 Both classes encapsulate Pyomo ABSTRACT models extending the core ITOM framework definition
 to include the possibility of retrofits in the energy-intensive industry system.
 
-@author: mathieusa
+@author: mathieusa, alexanderkl
 """
 
 __all__ = ('abstract_itom_retrofit',
