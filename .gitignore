@@ -1,3 +1,10 @@
+# Input and output folders except for demo scenarios
+input/*
+!input/demo/
+output/*
+!output/demo/
+
+
 # Mac OS hidden folder
 .DS_Store
 
