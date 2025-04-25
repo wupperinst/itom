@@ -4,6 +4,9 @@ input/*
 output/*
 !output/demo/
 
+# Configs folder except for default configuration file
+configs/*
+!configs/default_config.yaml
 
 # Mac OS hidden folder
 .DS_Store
