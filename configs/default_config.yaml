@@ -1,0 +1,79 @@
+## Config File for WI EDM ReInvest
+##
+version: '0.1'
+logging_level: INFO
+
+##### MODEL
+# This code will be used to build sub-directories for input, output data etc.
+model_run_code: ''
+
+##### FRAMEWORK OPTIONS
+framework:
+    # These options only work when using run-nomopyomo_edm-i.sh or queue-nomopyomo.sh
+    # If both are True, both types of .lp files are built but the model is only solve with the like_pyomo file
+    tinyomo: True # If True builds the nomopyomo .lp (hard for humans to read). If like_pyomo is False solves the problem with the nomopyomo file and generates a nomopyomo .mps file.
+    like_pyomo: False # If True builds the .lp and .mps files like pyomo (human readable, for debugging) and solves the problem with these files.
+    keep_MPS: True # if True the model .mps file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
+    keep_LP: False # if True the model .lp file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
+    keep_files: True # if True the intermediary files (objective.txt, constraints.txt, bounds.txt) are downloaded from the server and saved in your local output folder (otherwise they can be found in the raw_output folder on the server)
+
+##### SOLVER OPTIONS
+solver:
+    # glpk: solve the model locally on your laptop
+    # gurobi: send the model to the remote solver (need to be connected to the WI intranet)
+    name: gurobi # gurobi or glpk
+    shadow_prices: True # default: True (retrieve shadow prices)
+    threads: 0 # default 0 (all available cores are used)
+    method: -1 # default -1 (concurrent solvers - primal simplex, dual simplex and barrier); set 1 for dual simplex; setting algorithm might reduce run times of model); set 2 for barrier
+    LogToConsole: 0
+    OutputFlag: 1
+    optTol: 1e-6 # default 1e-6
+    feasTol: 1e-6 # default 1e-6
+    dual_reductions: 1 # default 1
+    crossover: -1 # default: -1 (automatic); 0 means Crossover is disabled (Note: disabling Crossover does not work with concurrent optimizers e.g. method = -1)
+    presolve: -1 # default: -1 (automatic); 0 means Presolve is disabled; 1 and 2 correspond to conservative (1) and aggressive (2) presolving
+    aggregate: 1 # default: 1 (moderate); 0 means Aggregate is disabled; 1 and 2 correspond to moderate (1) and aggressive (2) aggregation level in presolve
+    solution_target: -1 # default: -1 (automatic); 0 means primal and dual optimal and basic; 1 means primal and dual optimal
+    scale_flag: -1 # default: -1 (scaling on); set to 0 to turn off scaling, to 2 for geometric mean scaling (well suited for matrix with wide range in coefficients), to 1 or 3 to experiment with other scaling methods
+    pre_dual: -1 # default: -1; set to 0 to forbid presolve from forming the dual (might reduce run times of model)
+    bar_homogeneous: -1 # default: -1; set to 1 to force homogeneous barrier algorithm
+    seed: 0 # default: 0; set to a positive integer to set the seed for the model run (it creates a small random perturbation in the model)
+    bar_dense_thresh: 0 # default: 0. Set to 100 if you have problems with dense columns.
+
+################################################################################################
+# WORK IN PROGRESS BELOW THIS LINE
+# DO NOT MODIFY
+################################################################################################
+
+
+
+##### SERVER OPTIONS
+# input: csv input files are sent to the remote server where the abstract and concrete models are built
+# pickle: the concrete model is generated locally, saved as a pickle file which is sent to the remote server
+build_model_from: input # input or pickle
+
+### Processes and products
+# For long process lists, you can choose 'from_file: true' and give the name of the
+# file in 'proc_list'. NOTE: the file should be located in /input/model_run_code.
+# If you choose 'from_file: false', just give the list of processes directly into 'proc_list'.
+# NOTE: the file containing the process list must have a header (e.g. processes), each item
+# must be on a separate line and in "" (to avoid problems with commas when reading the file)
+processes:
+    from_file: True
+    proc_list: 'proc_list.csv'
+    retrofit: True
+# Same as above for product list
+products:
+    from_file: True
+    prod_list: 'prod_list.csv'
+
+### Transport
+# Allowing invesment in some transport modes is a handy way to implement full
+# connectiveness between all locations for all products without having to enter
+# the data specifically.
+# NOTE: for this to work, capital and fixed costs for these transport modes need to be zero.
+transport:
+    modes: ['ONSITE', 'PIPELINE', 'OTHER']
+    hub: True
+    allow_invest: True
+    invest_allowed: ['ONSITE', 'OTHER']

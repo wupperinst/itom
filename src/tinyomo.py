@@ -900,7 +900,7 @@ def write_objective(Obj, output_path):
 	print('Writing objective of the LP problem...')
 	objective_filename = os.path.join(output_path, "objective.txt")
 	objective_file = open(objective_filename,"w")
-	objective_file.write("\\* wi_edm-i_nomopyomo *\\")
+	objective_file.write("\\* ITOM_tinyomo *\\")
 	objective_file.write("\n\n")
 	objective_file.write("min\nOBJ:\n")
 
@@ -960,7 +960,7 @@ def write_constraints(ConsGroup, VarsGroup, SingleCons=None, shadow=False):
 	if shadow:
 		shadow_filename = os.path.join(ConsGroup.output_path, "constraints_detailed.txt")
 		shadow_file = open(shadow_filename,"w")
-		shadow_file.write("c.nomopyomo,c.name,index\n")
+		shadow_file.write("c.tinyomo,c.name,index\n")
 
 	# For testing/debugging purposes
 	if not SingleCons is None:
@@ -1316,7 +1316,7 @@ def write_objective_likepyomo(Obj, output_path):
 	print('[LIKE-PYOMO] Writing objective of the LP problem...')
 	objective_filename = os.path.join(output_path, "objective_likepyomo.txt")
 	objective_file = open(objective_filename,"w")
-	objective_file.write("\\* wi_edm-i_nomopyomo *\\")
+	objective_file.write("\\* ITOM_tinyomo *\\")
 	objective_file.write("\n\n")
 	objective_file.write("min\nOBJ:\n")
 
