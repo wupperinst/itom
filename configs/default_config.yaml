@@ -40,40 +40,13 @@ solver:
     seed: 0 # default: 0; set to a positive integer to set the seed for the model run (it creates a small random perturbation in the model)
     bar_dense_thresh: 0 # default: 0. Set to 100 if you have problems with dense columns.
 
-################################################################################################
-# WORK IN PROGRESS BELOW THIS LINE
-# DO NOT MODIFY
-################################################################################################
-
-
-
-##### SERVER OPTIONS
-# input: csv input files are sent to the remote server where the abstract and concrete models are built
-# pickle: the concrete model is generated locally, saved as a pickle file which is sent to the remote server
-build_model_from: input # input or pickle
-
-### Processes and products
-# For long process lists, you can choose 'from_file: true' and give the name of the
-# file in 'proc_list'. NOTE: the file should be located in /input/model_run_code.
-# If you choose 'from_file: false', just give the list of processes directly into 'proc_list'.
-# NOTE: the file containing the process list must have a header (e.g. processes), each item
-# must be on a separate line and in "" (to avoid problems with commas when reading the file)
+#### INPUT OPTIONS
 processes:
-    from_file: True
-    proc_list: 'proc_list.csv'
-    retrofit: True
-# Same as above for product list
-products:
-    from_file: True
-    prod_list: 'prod_list.csv'
-
-### Transport
-# Allowing invesment in some transport modes is a handy way to implement full
-# connectiveness between all locations for all products without having to enter
-# the data specifically.
-# NOTE: for this to work, capital and fixed costs for these transport modes need to be zero.
+    retrofit: True # If True, allow for capacity retrofit at end of life
 transport:
-    modes: ['ONSITE', 'PIPELINE', 'OTHER']
-    hub: True
-    allow_invest: True
-    invest_allowed: ['ONSITE', 'OTHER']
+    hub: True # If True, all locations are indirectly connectd to one another via a transport hub
+
+#### OUTPUT OPTIONS
+output:
+    units: default_var_units.csv # csv file with units for each variable. Must be located in the configs/ folder.
+    post_process: True # If True, runs some cleaning up and compressing of outputs

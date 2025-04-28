@@ -9,7 +9,7 @@ This script controls:
 
 This script should be called with:
         python3 run.py SCENARIO_NAME
-If a SCENARIO_NAME_config file exists in the configs/ folder, it will beused,
+If a SCENARIO_NAME_config file exists in the configs/ folder, it will be used,
 otherwise the default configuration file will be used.
 
 @author: mathieusa
@@ -39,6 +39,9 @@ from gurobipy import GRB
 from itom_hub_tinyomo import itom_hub_tinyomo
 from itom_retrofit_tinyomo import itom_hub_retrofit_tinyomo
 from itom_impurities_tinyomo import itom_hub_retrofit_impurities_tinyomo
+
+from helpers.post_process_output import process_output, compress_output
+from helpers.post_process_var_tinyomo import extract_results, extract_shadow_prices
 
 t0 = time.time()
 ###############################################################################
@@ -167,11 +170,11 @@ if config['framework']['tinyomo'] == False:
     print('Time to build concrete model:  ' + str(t2-t1) + ' seconds')
 
     # For debugging
-    if (config['framework']['keep_LP'] or config['framework']['keep_MPS']) and config['solver']['name']=='gurobi':
+    if config['framework']['keep_LP'] or config['framework']['keep_MPS']:
         print('DEBUGGING: export LP files')
         cm.export_lp_problem()
-        model = gp.read(os.path.join(output_path,'problem.lp'))
-        if config['framework']['keep_MPS'] and opt=='gurobi':
+        if config['framework']['keep_MPS'] and config['solver']['name']=='gurobi':
+            model = gp.read(os.path.join(output_path,'problem.lp'))
             model.write(os.path.join(output_path, config['model_run_code'] + '_'+ 'model.mps'))
 
     if config['framework']['keep_files']:
@@ -186,6 +189,14 @@ if config['framework']['tinyomo'] == False:
     cm.export_all_var() # Export all variables to csv files
     t4 = time.time()
     print('Time to export results:  ' + str(t4-t3) + ' seconds')
+
+    if config['output']['post_process']:
+        print('Post-processing results...')
+        output_files = _get_output_files(output_path=output_path, config=config)
+        process_output(module_path=repo_path, input_path=input_path,
+                        output_path=output_path, config=config,
+                        output_files=output_files)
+        compress_output(output_path=output_path, config=config, output_files=output_files)
 
     t5 = time.time()
     print('\nTotal server time:  ' + str(t5-t0) + ' seconds\n')
@@ -279,7 +290,7 @@ elif (config['framework']['tinyomo'] == True or config['framework']['like_pyomo'
             if not (file.endswith('variables.txt') or file.endswith('variables_overview.txt') or file.endswith('constraints_detailed.txt')):
                 file_to_remove = pathlib.Path(file)
                 file_to_remove.unlink()
-                
+
     # Post-processing of optimization results
 
     if model.status == GRB.INF_OR_UNBD:
@@ -297,19 +308,34 @@ elif (config['framework']['tinyomo'] == True or config['framework']['like_pyomo'
         print('Solutions written to model.sol')
 
         # Export variables to csv
+        print('Extracting results...')
         varInfo = [(v.varName, v.X) for v in model.getVars() if v.X > 0]
         # Write to csv
         with open(os.path.join(output_path, config['model_run_code'] + '_' + 'variables' + '.csv'), 'w') as file:
             wr = csv.writer(file, quoting=csv.QUOTE_ALL)
             wr.writerows(varInfo)
+        # Extract results in human-readable format
+        extract_results(scenario_name=config['model_run_code'], output_path=output_path)
 
+        # Shadow prices
         if config['solver']['shadow_prices']:
+            print('Extracting shadow prices...')
             # Export dual values (shadow prices)
             consInfo = [(c.ConstrName, c.Pi) for c in model.getConstrs()]
             # Write to csv
             with open(os.path.join(output_path, config['model_run_code'] + '_' + 'raw_shadow_prices' + '.csv'), 'w') as file:
                 wr = csv.writer(file, quoting=csv.QUOTE_ALL)
                 wr.writerows(consInfo)
+            # Extract shadow prices in human-readable format
+            extract_shadow_prices(scenario_name=config['model_run_code'], output_path=output_path, input_path=input_path)
+
+        if config['output']['post_process']:
+            print('Post-processing results...')
+            output_files = _get_output_files(output_path=output_path, config=config)
+            process_output(module_path=repo_path, input_path=input_path,
+                            output_path=output_path, config=config,
+                            output_files=output_files)
+            compress_output(output_path=output_path, config=config, output_files=output_files)
 
 
     elif model.status != GRB.OPTIMAL:
