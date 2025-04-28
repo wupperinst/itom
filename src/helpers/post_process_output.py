@@ -19,15 +19,25 @@ def _get_output_files(output_path='', config={}):
     '''
     '''
     model_run_code = config['model_run_code']
-    #output_files = [f for f in os.listdir(output_path) if (os.path.isfile(os.path.join(output_path, f))) and (f!='.DS_Store') and (f!='problem.lp')]
+    
+    # Output files
     csv_file_to_ignore = [model_run_code + '_variables.csv',
                           model_run_code + '_raw_shadow_prices.csv',
                           model_run_code + '_shadow_prices.csv']
     output_files = [f for f in os.listdir(output_path) if (os.path.isfile(os.path.join(output_path, f))) and (f.endswith('.csv')) and (f not in csv_file_to_ignore)]
-    return output_files
+    
+    # Variables
+    var = {}
+    for f in output_files:
+        if f.startswith(model_run_code + '_'):
+            var[f] = f[len(model_run_code)+1:-4] # Removes 'code_' and .csv from file name
+        else:
+            var[f] = f[:-4] # Removes '.csv' from file name
+
+    return output_files, var
 
 
-def process_output(module_path='', input_path='', output_path='', config={}, output_files=[]):
+def process_output(module_path='', input_path='', output_path='', config={}, output_files=[], var={}):
     '''
     Clean up outputs and run some first analyses.
     '''
@@ -36,13 +46,7 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     ###############################################################################
     # PREPARE
 
-    # Variables
-    var = {}
-    for f in output_files:
-        if f.startswith(model_run_code + '_'):
-            var[f] = f[len(model_run_code)+1:-4] # Removes 'code_' and .csv from file name
-        else:
-            var[f] = f[:-4] # Removes '.csv' from file name
+    model_run_code = config['model_run_code']
 
     # Sets
     sets = ['REGION','LOCATION', 'YEAR', 'TECHNOLOGY', 'TRANSPORTMODE', 'PRODUCT']
@@ -85,7 +89,7 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     cap_util.dropna(axis=0, inplace=True)
     nz_var_res = cap_util['LocalCapacityUtilization'].to_numpy().nonzero()
     var_res = cap_util.iloc[nz_var_res].sort_values(by=['LOCATION','YEAR'], axis=0, ascending=True, inplace=False)
-    var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),config['model_run_code']+'_capacity_utilization_at_location.csv'),index=False)
+    var_res.to_csv(os.path.join(output_path,config['model_run_code']+'_capacity_utilization_at_location.csv'),index=False)
 
     ## REGION LEVEL
 
@@ -114,7 +118,7 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     var_res.dropna(axis=0, inplace=True)
     nz_var_res = var_res['LocalCapacityUtilization'].to_numpy().nonzero()
     var_res = var_res.iloc[nz_var_res].sort_values(by=['REGION','YEAR'], axis=0, ascending=True, inplace=False)
-    var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),config['model_run_code']+'_capacity_utilization_at_region.csv'),index=False)
+    var_res.to_csv(os.path.join(output_path,config['model_run_code']+'_capacity_utilization_at_region.csv'),index=False)
 
     ### TRANSPORT
 
@@ -137,7 +141,7 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     var_res.VALUE = var_res.VALUE / time_step
     var_res = var_res[var_res['TRANSPORTMODE'].str.contains('PIPELINE')]
     var_res = var_res[var_res.VALUE > 0.1].sort_values(by=['from_LOCATION','YEAR'], axis=0, ascending=True, inplace=False)
-    var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),config['model_run_code']+'_pipeline_transport.csv'),index=False)
+    var_res.to_csv(os.path.join(output_path,config['model_run_code']+'_pipeline_transport.csv'),index=False)
 
     ## IMPORT through port terminal
 
@@ -171,7 +175,7 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     #nz_var_res = var_res['VALUE'].to_numpy().nonzero()
     #var_res = var_res.iloc[nz_var_res].sort_values(by=['REGION','YEAR'], axis=0, ascending=True, inplace=False)
     var_res = var_res[var_res.VALUE > 0.1].sort_values(by=['REGION','YEAR'], axis=0, ascending=True, inplace=False)
-    var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),config['model_run_code']+'_import_from_terminals.csv'),index=False)
+    var_res.to_csv(os.path.join(output_path,config['model_run_code']+'_import_from_terminals.csv'),index=False)
 
     ## EXPORT through port terminal
 
@@ -204,14 +208,14 @@ def process_output(module_path='', input_path='', output_path='', config={}, out
     var_res = df_agg.reset_index()
     nz_var_res = var_res['VALUE'].to_numpy().nonzero()
     var_res = var_res.iloc[nz_var_res].sort_values(by=['REGION','YEAR'], axis=0, ascending=True, inplace=False)
-    var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),config['model_run_code']+'_export_from_terminals.csv'),index=False)
+    var_res.to_csv(os.path.join(output_path,config['model_run_code']+'_export_from_terminals.csv'),index=False)
 
     t1 = time.time()
     print('Time to post-process raw output:  ' + str(t1-t0) + ' seconds')
 
 ###############################################################################
 # COMPRESS
-def compress_output(output_path='', config={}, output_files=[]):
+def compress_output(output_path='', config={}, output_files=[], var={}):
     '''
     Reduce output size by eliminating zero values.
     '''
@@ -221,7 +225,7 @@ def compress_output(output_path='', config={}, output_files=[]):
         var_res = pd.read_csv(os.path.join(output_path, f), encoding = "ISO-8859-1")
         nz_var_res = var_res[var[f]].to_numpy().nonzero()
         var_res = var_res.iloc[nz_var_res]
-        var_res.to_csv(os.path.join(os.path.abspath(os.path.join(ouput_path, config['model_run_code'])),f),index=False)
+        var_res.to_csv(os.path.join(output_path, f),index=False)
 
     t1 = time.time()
     print('Time to compress raw output:  ' + str(t1-t0) + ' seconds')

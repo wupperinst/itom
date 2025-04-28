@@ -15,7 +15,7 @@ otherwise the default configuration file will be used.
 @author: mathieusa
 """
 
-import os, yaml, logging, csv, timegc, sys, shutil, glob
+import os, yaml, logging, csv, sys, time, gc, shutil, glob, pathlib
 import argparse
 
 import pandas as pd
@@ -25,7 +25,7 @@ from pyomo.environ import value
 from helpers.directory_check import check_directory
 from helpers.data2csv import xlsx2csv
 from helpers.debug_util import debug_infeas
-from helpers.build_input_data import get_raw_input_data, build_sets, build_params, _build_transport_params
+from helpers.build_input_data import _build_transport_params
 from helpers.input_data_check import check_input_data
 
 from itom import abstract_itom, concrete_itom
@@ -40,7 +40,7 @@ from itom_hub_tinyomo import itom_hub_tinyomo
 from itom_retrofit_tinyomo import itom_hub_retrofit_tinyomo
 from itom_impurities_tinyomo import itom_hub_retrofit_impurities_tinyomo
 
-from helpers.post_process_output import process_output, compress_output
+from helpers.post_process_output import _get_output_files, process_output, compress_output
 from helpers.post_process_var_tinyomo import extract_results, extract_shadow_prices
 
 t0 = time.time()
@@ -331,11 +331,12 @@ elif (config['framework']['tinyomo'] == True or config['framework']['like_pyomo'
 
         if config['output']['post_process']:
             print('Post-processing results...')
-            output_files = _get_output_files(output_path=output_path, config=config)
+            output_files, var = _get_output_files(output_path=output_path, config=config)
             process_output(module_path=repo_path, input_path=input_path,
                             output_path=output_path, config=config,
-                            output_files=output_files)
-            compress_output(output_path=output_path, config=config, output_files=output_files)
+                            output_files=output_files, var=var)
+            compress_output(output_path=output_path, config=config, 
+                            output_files=output_files, var=var)
 
 
     elif model.status != GRB.OPTIMAL:

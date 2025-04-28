@@ -103,8 +103,14 @@ def check_input_data(input_path, param_set_index, config):
     avoid_files = ['INFO.csv', '.DS_Store']
     # Check the config file and to see whether proc_list and prod_list are defined,
     # if yes, assign proc and prod to True and False if not.
-    proc = True if len(config['processes']['proc_list']) > 1 else False
-    prod = True if len(config['products']['prod_list']) > 1 else False
+    try:
+        proc = True if len(config['processes']['proc_list']) > 1 else False
+    except KeyError:
+        proc = False
+    try:
+        prod = True if len(config['products']['prod_list']) > 1 else False
+    except KeyError:
+        prod = False
     sets = {}
     mismatch = {}
     dupi = {}

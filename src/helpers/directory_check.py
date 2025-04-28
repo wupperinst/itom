@@ -18,7 +18,7 @@ def check_directory(model_run_code, repo_path):
     resume (existing files will be overwritten).
     '''
     os.chdir(repo_path)
-    for loc in ['input', 'output', 'log']:
+    for loc in ['input', 'output']:
         os.chdir(repo_path)
         os.chdir(loc)
         exists = True if os.path.exists(model_run_code) else False

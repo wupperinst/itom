@@ -12,6 +12,7 @@ This module provides methods to:
 @author: mathieusa, alexanderkl
 '''
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -113,15 +114,3 @@ def extract_shadow_prices(scenario_name='', output_path='', input_path=''):
 	shadow_merged.to_csv(os.path.join(output_path, f'{scenario_name}_shadow_prices.csv'), index=True)
 
 	return None
-
-##########################################################
-
-extract_results(scenario_name=config['model_run_code'], output_path=output_path)
-
-t1 = time.time()
-print('Time to extract variables:  ' + str(t1-t0) + ' seconds')
-
-if config['solver']['shadow_prices']:
-	extract_shadow_prices(scenario_name=config['model_run_code'], output_path=output_path, input_path=input_path)
-	t2 = time.time()
-	print('Time to extract shadow prices:  ' + str(t2-t1) + ' seconds')

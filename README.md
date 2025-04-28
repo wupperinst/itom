@@ -16,7 +16,7 @@ ITOM is meant for geographically detailed techno-economic bottom-up linear optim
 # Installation
  - Download the code from this repository or `git clone` it.
  - Install the requirements in a [python virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
- - Run `python main.py SCENARIO_NAME` from the repo's folder after you have prepared input data in the required format.
+ - Run `python3 src/run.py -s SCENARIO_NAME` from the repo's folder after you have prepared input data in the required format.
 
 # Documentation
 Soon available at [readthedocs](https://about.readthedocs.com/)!
