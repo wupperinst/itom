@@ -1,2 +1,0 @@
-TO DO
-Provide input data for one or more simple model examples.
