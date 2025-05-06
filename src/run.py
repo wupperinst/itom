@@ -309,7 +309,7 @@ elif (config['framework']['tinyomo'] == True or config['framework']['like_pyomo'
 
         # Export variables to csv
         print('Extracting results...')
-        varInfo = [(v.varName, v.X) for v in model.getVars() if v.X > 0]
+        varInfo = [(v.varName, v.X) for v in model.getVars() if v.X != 0]
         # Write to csv
         with open(os.path.join(output_path, config['model_run_code'] + '_' + 'variables' + '.csv'), 'w') as file:
             wr = csv.writer(file, quoting=csv.QUOTE_ALL)
