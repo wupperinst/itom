@@ -49,15 +49,16 @@ t0 = time.time()
 
 parser = argparse.ArgumentParser(description='Prepare input data for edm-I.')
 parser.add_argument('-s', '--scenario', dest='scenario', type=str, help='scenario names')
+# parser.add_argument('-d', '--output_dir', dest='output_dir', type=str, default='/work/Itom', help='Base path to output files (optional, defaults to /work/Itom)')
 args = parser.parse_args()
 
 ###############################################################################
 # CONFIG
 
 # Generate path to root of repo
-if os.getcwd().endswith('itom'):
+if os.getcwd().endswith('03_Itom'):
     repo_path = os.path.abspath(os.getcwd())
-elif os.getcwd().endswith('itom/src'):
+elif os.getcwd().endswith('03_Itom/src'):
     repo_path = os.path.abspath(os.pardir)
 else:
     print('Config path could not be defined. Check your working directory.')
@@ -77,6 +78,7 @@ except:
     with open(os.path.join(config_path, 'default_config.yaml'), 'r') as stream:
         config = yaml.safe_load(stream)
         config['model_run_code'] = args.scenario
+        # config['solver']['threads'] = int(os.getenv('SLURM_CPUS_PER_TASK', 0))
 
 stream.close()
 
@@ -88,11 +90,21 @@ logger.setLevel(logging.WARNING)
 
 # Check the directory structure
 print('Check directory structure...')
-check_directory(config['model_run_code'], repo_path)
+# check_directory(config['model_run_code'], repo_path)
+
+# Checking if the path is specified by a job ID
+job_ID = ""
+if int(os.getenv('USE_JOB_SUBDIR', 0)) == 1:
+    job_ID = "_" + os.getenv('SLURM_JOB_ID', "")
 
 # Generate paths to other folders
-input_path = os.path.join(repo_path, 'input', config['model_run_code'])
-output_path = os.path.join(repo_path, 'output', config['model_run_code'])
+input_path = os.path.join(repo_path, 'input', config['model_run_code'] + job_ID)
+# output_path = os.path.join(repo_path, 'output', config['model_run_code'])
+output_path = os.path.join(os.getenv('OUTPUT_REPO', repo_path), 'output', config['model_run_code'] + job_ID)
+print(f"Output Directory: {output_path}")
+print(f"Input Directory: {input_path}")
+os.makedirs(input_path, exist_ok=True)
+os.makedirs(output_path, exist_ok=True)
 
 # Optimisation solver
 opt = SolverFactory(config['solver']['name'])

@@ -1,0 +1,18 @@
+name: itom_3_13
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.13.0
+  - pyomo
+  - glpk
+  - matplotlib
+  - numpy
+  - pandas
+  - pyyaml
+  - unicodecsv
+  - xlrd=1.2.0
+  - wheel
+  - pip
+  - pip:
+      - gurobipy
