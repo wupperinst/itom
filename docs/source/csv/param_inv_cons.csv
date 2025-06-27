@@ -1,0 +1,3 @@
+param, index, default, unit, description
+LocalTotalAnnualMaxCapacityInvestment,"LOCATION, TECHNOLOGY, YEAR",0,GJ or Mt,Maximum new capacity each year. Use this to allow the model investing in existing technologies.
+LocalTotalAnnualMinCapacityInvestment,"LOCATION, TECHNOLOGY, YEAR",0,GJ or Mt,Minimum new capacity each year. Use this to reflect political or corporate targets.

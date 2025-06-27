@@ -1,0 +1,4 @@
+param, index, default, unit, description
+CapacityOfOneTechnologyUnit,"REGION, TECHNOLOGY, YEAR",0,GJ or Mt,"Defines the minimum size of one capacity addition. If set to zero, no mixed integer linear programming (MILP) is used and computational time will decrease."
+TotalAnnualMaxCapacity,"REGION, TECHNOLOGY, YEAR",99999,GJ or Mt,Maximum total (residual and new) capacity each year.
+TotalAnnualMinCapacity,"REGION, TECHNOLOGY, YEAR",0,GJ or Mt,Minimum total (residual and new) capacity each year.

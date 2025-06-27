@@ -1,0 +1,7 @@
+set, description
+YEAR, timeseries of model snapshots
+TECHNOLOGY, supply of raw materials (e.g. SUPP_OIL) and industrial production (e.g. STEAMCRACKER)
+TRANSPORTMODE, transport of products between locations (e.g. PIPELINE)
+PRODUCT, "anything that can be used in a technology or transport mode (e.g. NAPHTA, ETHYLENE, H2, ELECTRICITY)"
+REGION, a geographical system boundary
+LOCATION, a production site within a region

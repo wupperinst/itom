@@ -1,0 +1,2 @@
+param, index, default, unit, description
+Demand,"REGION, PRODUCT, YEAR",0,PJ or Mt,The annual requirement for each output product.

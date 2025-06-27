@@ -1,0 +1,5 @@
+param, index, default, unit, description
+TotalTechnologyAnnualActivityUpperLimit,"REGION, TECHNOLOGY, YEAR",99999,PJ or Mt,Maximum amount of activity that a technology can perform each year.
+TotalTechnologyAnnualActivityLowerLimit,"REGION, TECHNOLOGY, YEAR",0.0,PJ or Mt,Minimum activity that a technology can perform each year.
+TotalTechnologyModelPeriodActivityUpperLimit,"REGION, TECHNOLOGY",99999,PJ or Mt,Maximum level of activity by a technology over the whole modelling period.
+TotalTechnologyModelPeriodActivityLowerLimit,"REGION, TECHNOLOGY",0.0,PJ or Mt,Minimum level of activity by a technology over the whole modelling period.

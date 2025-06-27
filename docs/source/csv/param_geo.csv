@@ -1,0 +1,4 @@
+param, index, default, unit, description
+Geography,"REGION, LOCATION",0,either 1 or 0,Defines in which region R location L is located. 1 defines L 'is located within' R. 0 means 'is not located within'.
+TransportRoute,"LOCATION, LOCATION, PRODUCT, TRANSPORTMODE, YEAR",0,either 1 or 0,Defines which location L is linked with which location LL in order to enable or disable transport of a specific product with a given transport mode. 1 defines a transport link and 0 ensures that no transport occurs. Values inbetween are not allowed.
+TransportCapacity,"LOCATION, LOCATION, PRODUCT, TRANSPORTMODE, YEAR",0.0,PJ or Mt / yr,Defines the maximum flow of a given product using a given transport mode between two locations in a given year.

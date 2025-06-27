@@ -1,0 +1,5 @@
+param, index, default, unit, description
+CapitalCost,"REGION, TECHNOLOGY, YEAR",0.0,Mio EUR/GJ or Mt Capacity,Total capital cost (including interest paid during construction) per unit of capacity for new capacity additions.
+VariableCost,"REGION, TECHNOLOGY, YEAR",0.00001,Mio EUR/PJ = EUR/GJ or Mio EUR/Mt,Cost per unit of activity of the technology. This variable records both the O&M costs of processes and costs of each product inputs supplied to those processes.
+FixedCost,"REGION, TECHNOLOGY, YEAR",0.0,Mio EUR/GJ or Mt of Capacity,The annual cost per unit of capacity of a technology.
+TransportCostByMode,"REGION, TRANSPORTMODE, YEAR",0.0,Mio EUR/GJ or Mt,Cost of transporting one unit of product.

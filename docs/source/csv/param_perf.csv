@@ -1,0 +1,7 @@
+param, index, default, unit, description
+CapacityToActivityUnit,"REGION, TECHNOLOGY",1,"unit of output (activity) / unit of capacity per year, e.g. PJ/GW-YR, Mt/Mt-YR","For processes whose capacity and activity units are the same, use a factor of 1. If not using yearly time steps, use the length of a time step (e.g. 10 year steps: CapacityToActivityUnit = 10). For power plants we use a factor of 31.536, which is the level of energy production in PJ produced from 1 GW operating for 1 year (1GW * 8760 * 3600 / 10^6)."
+AvailabilityFactor,"REGION, TECHNOLOGY, YEAR",1,fraction of hours in year,Maximum time technology may run for the whole year. Often used to simulate planned outages. The model will choose when to run or not to run.
+OperationalLife,"REGION, TECHNOLOGY",1,years,Operational lifespan of a process in years.
+LocalResidualCapacity,"REGION, TECHNOLOGY, YEAR",0,GJ or Mt,The capacity left over from periods prior to the modeling period.
+InputActivityRatio,"REGION, TECHNOLOGY, PRODUCT, YEAR",0,Ratio,The input (use) of product per unit of activity for each technology (i.e. inverse efficiency).
+OutputActivityRatio,"REGION, TECHNOLOGY, FUEL, YEAR",0,Ratio,Ratio of output to activity. Should be 1 for a technology/process and its primary output product. Can be different than 1 for a technology/process and its secondary output products.

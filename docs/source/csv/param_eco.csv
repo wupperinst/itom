@@ -1,0 +1,3 @@
+param, index, default, unit, description
+DiscountRate,REGION,0.05,,
+DepreciationMethod,REGION,1,,
