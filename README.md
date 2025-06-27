@@ -41,6 +41,6 @@ If you'd like to contribute, the [issues page](https://github.com/wupperinst/ito
 If you wish to contribute your own, just create a fork and open a PR!
 
 # License
-[ITOM](https://github.com/wupperinst/itom) © 2025 by [Wuppertal Institute for climate, environment and energy](https://wupperinst.org/) is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1)
+[ITOM](https://github.com/wupperinst/itom) © 2025 by [Wuppertal Institute for climate, environment and energy](https://wupperinst.org/) is licensed under [GNU AGPL 3.0](https://www.gnu.org/licenses/agpl-3.0.html)
 
 
