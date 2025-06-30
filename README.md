@@ -30,7 +30,7 @@ Repository: https://github.com/OSeMOSYS/OSeMOSYS
 
 # Implementation
 This repo is limited to the ITOM framework itself, without data to model industrial sectors.
-However, detailed model implementations of the European petrochemical, steel, and cement sectors 
+However, detailed model implementations of the European [petrochemical](https://doi.org/10.5281/zenodo.15773103), [steel](https://doi.org/10.5281/zenodo.15772719), and [cement](https://doi.org/10.5281/zenodo.15773257) sectors 
 (including documentation, input and output data) are [available on Zenodo](https://doi.org/10.5281/zenodo.15722549).
 
 # Documentation
