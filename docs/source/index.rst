@@ -14,7 +14,7 @@
 
 .. toctree::
     :hidden:
-    :caption: Model implementations
+    :caption: Model applications
     :maxdepth: 3
     
     sectors
