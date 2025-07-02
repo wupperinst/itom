@@ -54,6 +54,8 @@ The input dataset and its documentation for the `steel sectoral model`_ built wi
 
 .. _steel sectoral model: https://doi.org/10.5281/zenodo.15772719
 
+.. _itom-petchem:
+
 ITOM-petchem
 ============
 
