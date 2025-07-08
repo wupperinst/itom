@@ -52,6 +52,7 @@ it signals a problem which can be identified through the extreme costs.
    | It is desirable to keep the range of the matrix coefficients and right-hand side values of the LP problem as small as possible. 10\ :sup:`4` is usually considered best-practice and anything above 10\ :sup:`6` is problematic.
    | Too high ranges in the coefficients and RHS values can (and probably will) lead to numerical issues, especially so with large LP problems.
 
+.. _hacks-pipeline-transfert:
 
 Pipeline transport passing through locations (pipeline_transfert technologies)
 ===============================================================================
@@ -185,8 +186,10 @@ of the waste product, in terms of CO\ :sub:`2`. The opportunity revenue is subse
    Brussels. https://eur-lex.europa.eu/eli/dir/2003/87/oj/eng).
 
 
-Tracking prices of products in the model using demand products
-================================================================
+.. _hacks-shadow-prices:
+
+Tracking shadow prices of intermediate and final products
+==========================================================
 
 It is often interesting to know and analyse the “prices” of various (incl. intermediate) products in the modelled system, 
 for example of the final polymers or the HVCs in the petrochemical sectoral model (see :ref:`itom-petchem`). 

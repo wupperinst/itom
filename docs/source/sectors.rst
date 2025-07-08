@@ -1,3 +1,5 @@
+.. _sectoral-models:
+
 *********************
 Sectoral models
 *********************

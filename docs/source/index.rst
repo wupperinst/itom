@@ -6,11 +6,11 @@
 
 .. toctree::
     :hidden:
-    :caption: Framework overview
+    :caption: Framework design
     :maxdepth: 3
     
     concept
-    design
+    structure
 
 .. toctree::
     :hidden:
