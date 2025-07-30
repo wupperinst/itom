@@ -7,23 +7,66 @@ Structure
 Framework classes
 ==================
 
-
-
-The following inheritance diagram presents the class components of ITOM as implemented in the *itom.py* file.
+The following inheritance diagrams present the class components of ITOM as implemented in the *src/* folder
 Detailed documentation of the classes, their attributes and methods is available below at the conceptual level 
 and in the :ref:`components` chapter for the concrete implementation.
 
-The classes *abstract_itom* and *concrete_itom* build up the **core model**.
+The class *abstract_itom* provides the tools to build industry models 
+where every location is *directly* linked to every other location.
+The class *abstract_itom_hub* provides the tools to build industry models 
+where every location in a given region is *indirectly* linked to every 
+other location in that region through a transport hub.
+Both classes use objects from the `Pyomo library`_.
+The class *abstract_itom_hub_tinyomo* provides the same functionalities as *abstract_itom_hub* but uses objects from 
+our own `tinyomo`_ clone of Pyomo, which allows for larger problems to be modelled through reduced memory consumption.
 
-The class *abstract_edm_reinvest_extended* is not implemented. The graph just shows how the core model could be 
-extended (*via* subclassing) with new sets, parameters, variables, constraints, or even objectives.
+The *abstract* classes presented above together with the *concrete_itom* class form the core of the framework, in three 
+different forms. Each option has its own advantages and disadvantages:
 
-.. figure:: img/itom_uml.jpg
+* *abstract_itom* is adapted to problems with a smaller number of locations where tracking the exchange of products 
+  between individual locations is of interest. The number of transport links between locations increases as n*(n-1) 
+  with the number n of locations, which can lead to very large problems that cannot be built or solved depending on your hardware.
+* *abstract_itom_hub* is adapted to problems with a larger number of locations where the exchange of products between locations 
+  is assumed to happen in a liquid market fashion, i.e. where the transport hub is used to aggregate product flows from all locations 
+  in a region and can serve all locations in that region. The number of transport links increases linearily with the number n of locations.
+* *abstract_itom_hub_tinyomo* is adapted to problems becoming too large due to the number of locations, 
+  products, and technologies, which results in a very large number of equations that may not fit in memory when the LP problem is built with Pyomo.
+
+The core *abstract* classes can easily be extended to model more details of industry systems. The subclasses inherit the attributes and methods of 
+the parent class and can define new sets, parameters, variables, constraints, or even objectives. They can also overwrite attributes 
+or methods of the parent class. We have developed the following subclasses available in the *src/* folder:
+
+* *retrofit*: allows for certain production capacities reaching their end-of-life to be retrofitted, that is to be upgraded to a new technology 
+  and see its lifetime extended.
+* *impurities*: allows for tracking impurities in input and output products and setting limits on impurity levels in certain products. 
+  It can be used, for example, for modelling  the production of steel from scrap (or a mix of scrap an iron ore) with several grades of scrap 
+  and different impurity tolerances for different steel grades.
+
+All *abstract* classes are built on the same principles, first defining *sets* attributes that are used to index the *parameters*, 
+*variables*, and *constraints* attributes that are defined next. Finally, the equations of the LP problem are built as class methods, 
+each being a function referred to as a *constraint_rule*. This structure is the same whether we use Pyomo or tinyomo to build the LP problem,
+only the syntax differs.
+
+.. _Pyomo library: https://www.pyomo.org/
+.. _tinyomo: https://github.com/wupperinst/tinyomo/tree/main
+
+.. figure:: img/uml_itom.png
    :alt: UML diagram for ITOM
    :align: center
    
    Class diagram for ITOM
 
+.. figure:: img/uml_itom_hub.png
+   :alt: UML diagram for ITOM hub
+   :align: center
+   
+   Class diagram for ITOM hub
+
+.. figure:: img/uml_itom_hub_tinyomo.png
+   :alt: UML diagram for ITOM hub tinyomo
+   :align: center
+   
+   Class diagram for ITOM hub with tinyomo
 
 
 Basics: sets, parameters, constraints, variables
@@ -469,6 +512,7 @@ a surplus of a major output::
 
 At each location L the total quantity of each product transported (arriving) from all other locations each
 year is equal to the use of this product at location L::
+    
     SUM_locations Transport[product] L to L0 = Use[product] in L0
 
 Import & Export
