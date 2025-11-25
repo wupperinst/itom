@@ -55,10 +55,10 @@ args = parser.parse_args()
 ###############################################################################
 # CONFIG
 
-# Generate path to root of repo
-if os.getcwd().endswith('03_Itom'):
+# Generate path to root of repo TODO make more robust
+if os.getcwd().endswith('02_Itom'):
     repo_path = os.path.abspath(os.getcwd())
-elif os.getcwd().endswith('03_Itom/src'):
+elif os.getcwd().endswith('02_Itom/src'):
     repo_path = os.path.abspath(os.pardir)
 else:
     print('Config path could not be defined. Check your working directory.')
@@ -98,6 +98,7 @@ if int(os.getenv('USE_JOB_SUBDIR', 0)) == 1:
     job_ID = "_" + os.getenv('SLURM_JOB_ID', "")
 
 # Generate paths to other folders
+# input_path = os.path.join(repo_path, 'input')
 input_path = os.path.join(repo_path, 'input', config['model_run_code'] + job_ID)
 # output_path = os.path.join(repo_path, 'output', config['model_run_code'])
 output_path = os.path.join(os.getenv('OUTPUT_REPO', repo_path), 'output', config['model_run_code'] + job_ID)

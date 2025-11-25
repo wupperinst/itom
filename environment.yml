@@ -1,4 +1,4 @@
-name: itom_3_13
+name: itom
 channels:
   - conda-forge
   - defaults

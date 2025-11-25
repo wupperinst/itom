@@ -13,9 +13,9 @@ framework:
     # If both are True, both types of .lp files are built but the model is only solve with the like_pyomo file
     tinyomo: True # If True builds the nomopyomo .lp (hard for humans to read). If like_pyomo is False solves the problem with the nomopyomo file and generates a nomopyomo .mps file.
     like_pyomo: False # If True builds the .lp and .mps files like pyomo (human readable, for debugging) and solves the problem with these files.
-    keep_MPS: True # if True the model .mps file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
+    keep_MPS: False # if True the model .mps file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
     keep_LP: False # if True the model .lp file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
-    keep_files: True # if True the intermediary files (objective.txt, constraints.txt, bounds.txt) are downloaded from the server and saved in your local output folder (otherwise they can be found in the raw_output folder on the server)
+    keep_files: False # if True the intermediary files (objective.txt, constraints.txt, bounds.txt) are downloaded from the server and saved in your local output folder (otherwise they can be found in the raw_output folder on the server)
 
 ##### SOLVER OPTIONS
 solver:
