@@ -9,7 +9,7 @@ This module defines:
 @author: mathieusa
 '''
 
-__all__ = ('itom_hub_retrofit_tinyomo')
+__all__ = ('itom_hub_retrofit_tinyomo',)
 
 from tinyomo import Set, Param, Vars, Var, Constraints, Constraint
 from tinyomo import NonNegativeReals
@@ -88,10 +88,11 @@ class itom_hub_retrofit_tinyomo(itom_hub_tinyomo):
 		*Constraint:* retrofit capacity potential is given by the residual
 		capacity of technologies allowed to be retrofitted reaching their
 		end-of-life in any given year.
+		::
 
-		PotentialRetrofitFromResidual(l, t, y) == LocalResidualCapacity(l, t, y - TimeStep(y)) - LocalResidualCapacity(l, t, y)
+			PotentialRetrofitFromResidual(l, t, y) == LocalResidualCapacity(l, t, y - TimeStep(y)) - LocalResidualCapacity(l, t, y)
 
-		PotentialRetrofitFromResidual(l, t, y) == 0
+			PotentialRetrofitFromResidual(l, t, y) == 0
 		"""
 		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data.VALUE)) or (self.TechnologyToRetrofit.get_value(t) == 0):
 			return None
@@ -115,9 +116,10 @@ class itom_hub_retrofit_tinyomo(itom_hub_tinyomo):
 		*Constraint:* retrofit capacity potential is given by the accumulated
 		new capacity of technologies allowed to be retrofitted reaching their
 		end-of-life in any given year.
+		::
 
-		PotentialRetrofitFromNew(l, t, y) == sum(LocalNewCapacity(l, t, yy) for yy in YEAR if (y - yy == sum(
-					OperationalLife(r, t) * Geography(r, l) for r in REGION)) and (y - yy > 0))
+			PotentialRetrofitFromNew(l, t, y) == sum(LocalNewCapacity(l, t, yy) for yy in YEAR if (y - yy == sum(
+				OperationalLife(r, t) * Geography(r, l) for r in REGION)) and (y - yy > 0))
 		"""
 
 		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data.VALUE)) or (self.TechnologyToRetrofit.get_value(t) == 0):
@@ -134,12 +136,14 @@ class itom_hub_retrofit_tinyomo(itom_hub_tinyomo):
 
 	def R3_RetrofitCapacityConstraint_rule(self, l, t, y):
 		"""
-		*Constraint:* retrofit capacity is constrained by the installed capacity
-		of technologies allowed to be retrofitted reaching their end-of-life
+		*Constraint:* retrofit capacity is constrained by the installed capacity 
+		of technologies allowed to be retrofitted reaching their end-of-life 
 		in any given year.
+		::
 
-		LocalNewCapacity(l, t, y) == 0
-		(LocalNewCapacity(l, t, y) + sum(LocalNewCapacity(l, tech, y) for tech in OtherRetrofitTechnology) <=
+			LocalNewCapacity(l, t, y) == 0
+		
+			(LocalNewCapacity(l, t, y) + sum(LocalNewCapacity(l, tech, y) for tech in OtherRetrofitTechnology) <=
 				(1 + 0.1) * sum(PotentialRetrofitFromResidual(l, tech, y) + PotentialRetrofitFromNew(l, tech, y) for tech in RelevantTechnology))
 		"""
 
