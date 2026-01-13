@@ -4,18 +4,19 @@ version: '0.1'
 logging_level: INFO
 
 ##### MODEL
-# This code will be used to build sub-directories for input, output data etc.
+# This code will be used to check the xistence and/or build sub-directories for input, output data etc.
+# If no code is provided (empty string), it is expected that the user provides one as -s or --scenario argument when calling run.py.
 model_run_code: ''
 
 ##### FRAMEWORK OPTIONS
 framework:
-    # These options only work when using run-nomopyomo_edm-i.sh or queue-nomopyomo.sh
-    # If both are True, both types of .lp files are built but the model is only solve with the like_pyomo file
-    tinyomo: True # If True builds the nomopyomo .lp (hard for humans to read). If like_pyomo is False solves the problem with the nomopyomo file and generates a nomopyomo .mps file.
+    # If both tinyomo and like_pyomo are True, both types of .lp files are built but the model is only solve with the like_pyomo file
+    tinyomo: True # If False, the model uses PYOMO to build the model, if True it uses tinyomo to build the .lp and .mps files.
     like_pyomo: False # If True builds the .lp and .mps files like pyomo (human readable, for debugging) and solves the problem with these files.
-    keep_MPS: True # if True the model .mps file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
-    keep_LP: False # if True the model .lp file is downloaded from the server and saved in your local output folder (otherwise it can be found in the raw_output folder on the server)
-    keep_files: True # if True the intermediary files (objective.txt, constraints.txt, bounds.txt) are downloaded from the server and saved in your local output folder (otherwise they can be found in the raw_output folder on the server)
+    keep_MPS: True # If True the model .mps file is not deleted from the output folder after the model run.
+    keep_LP: False # If True the model .lp file is not deleted from the output folder after the model run.
+    keep_files: False # If True the intermediary files (objective.txt, constraints.txt, bounds.txt) are not deleted from the output folder after the model run.
+    keep_SOL: False # If False the solution .sol file is not generated, if True it is generated and saved in the output folder after the model run.
 
 ##### SOLVER OPTIONS
 solver:

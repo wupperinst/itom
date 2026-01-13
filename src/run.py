@@ -321,8 +321,9 @@ if args.scope in ['all', 'build_lp', 'solve_lp', 'build_and_solve_lp']:
                 model.printQuality()
 
                 # Write solution to file
-                model.write(os.path.join(output_path, config['model_run_code'] + '_' + 'model.sol'))
-                print('Solutions written to model.sol')
+                if config['framework']['keep_SOL']:
+                    model.write(os.path.join(output_path, config['model_run_code'] + '_' + 'model.sol'))
+                    print('Solutions written to model.sol')
 
                 # Export variables to csv
                 print('Extracting results...')
