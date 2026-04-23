@@ -182,9 +182,11 @@ class abstract_itom_hub(object):
         self.model.EmissionsPenalty = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=0)
         self.model.AnnualExogenousEmission = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=0)
         self.model.AnnualEmissionLimit = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=self.HighMaxDefault)
+        self.model.TotalAnnualEmissionLimit = Param(self.model.EMISSION, self.model.YEAR, default=self.HighMaxDefault)
 #        self.model.AnnualEmissionLimit = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, mutable=True, default=self.HighMaxDefault) # Param(mutable=True) allows to change the value of this parameter dynamically after the parameter has been constructed.
         self.model.ModelPeriodExogenousEmission = Param(self.model.REGION, self.model.EMISSION, default=0)
         self.model.ModelPeriodEmissionLimit = Param(self.model.REGION, self.model.EMISSION, default=self.HighMaxDefault)
+        self.model.TotalModelPeriodEmissionLimit = Param(self.model.EMISSION, default=self.HighMaxDefault)        
 #        self.model.ModelPeriodEmissionLimit = Param(self.model.REGION, self.model.EMISSION, mutable=True, default=self.HighMaxDefault) # Param(mutable=True) allows to change the value of this parameter dynamically after the parameter has been constructed.
 
         ######################
@@ -420,6 +422,10 @@ class abstract_itom_hub(object):
         self.model.E9_AnnualEmissionsLimit = Constraint(self.model.REGION, self.model.EMISSION, self.model.YEAR, rule=self.E9_AnnualEmissionsLimit_rule)
 
         self.model.E10_ModelPeriodEmissionsLimit = Constraint(self.model.REGION, self.model.EMISSION, rule=self.E10_ModelPeriodEmissionsLimit_rule)
+
+        self.model.E11_TotalAnnualEmissionsLimit = Constraint(self.model.EMISSION, self.model.YEAR, rule=self.E11_TotalAnnualEmissionsLimit_rule)
+
+        self.model.E12_TotalModelPeriodEmissionsLimit = Constraint(self.model.EMISSION, rule=self.E12_TotalModelPeriodEmissionsLimit_rule)
 
     ###########
     # METHODS #
@@ -1150,6 +1156,27 @@ class abstract_itom_hub(object):
         '''
         if self.model.ModelPeriodEmissionLimit[r,e] != self.HighMaxDefault:
             return self.model.ModelPeriodEmissions[r,e] <= self.model.ModelPeriodEmissionLimit[r,e]
+        else:
+            return Constraint.Skip
+
+    def E11_TotalAnnualEmissionsLimit_rule(self, model,e,y):
+        '''
+        *Constraint:* for each emission type, and year total emissions 
+        should be lower than the emission limit entered by the analyst.
+        '''
+        if self.model.TotalAnnualEmissionLimit[e,y] != self.HighMaxDefault:
+            return sum(self.model.AnnualEmissions[r,e,y] + self.model.AnnualExogenousEmission[r,e,y] for r in self.model.REGION) <= self.model.TotalAnnualEmissionLimit[e,y]
+        else:
+            return Constraint.Skip
+
+    def E12_TotalModelPeriodEmissionsLimit_rule(self, model,e):
+        '''
+        *Constraint:* for each emission type total emissions over the 
+        whole emission period should be lower than the emission limit entered by 
+        the analyst.
+        '''
+        if self.model.TotalModelPeriodEmissionLimit[e] != self.HighMaxDefault:
+            return sum(self.model.ModelPeriodEmissions[r,e] for r in self.model.REGION) <= self.model.TotalModelPeriodEmissionLimit[e]
         else:
             return Constraint.Skip
 
