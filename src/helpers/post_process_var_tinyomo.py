@@ -92,6 +92,8 @@ def extract_shadow_prices(scenario_name='', output_path='', input_path=''):
 	min_year = years.min().values[0]
 	regions = pd.read_csv(os.path.join(input_path, 'REGION.csv'))
 	discount_rate = pd.read_csv(os.path.join(input_path, 'DiscountRate.csv'))
+	time_steps = pd.read_csv(os.path.join(input_path, 'TimeStep.csv'))
+	time_step = time_steps.loc[time_steps['YEAR'] == min_year]['TimeStep'].values[0]
 
 	# The "index" column of the shadow_merged dataframe contains the sets making up the index of the constraint, separated by ";".
 	# Example: EU-27+3;ABS_terminal;2030
@@ -106,9 +108,13 @@ def extract_shadow_prices(scenario_name='', output_path='', input_path=''):
 	shadow_merged['REGION'] = shadow_merged['index'].str.split(';').str[0]
 	shadow_merged = shadow_merged.merge(discount_rate, on='REGION', how='left')
 
-	# Calculate the undiscounted shadow prices.
+	# Calculate the undiscounted shadow prices with two different formuls using two different timeframes
+	# 1) With the timeframe used to discount capital costs
     # Formula: discounted shadow price * (1 + discount rate)^(year - min_year)
-	shadow_merged['undiscounted_shadow_price'] = shadow_merged['shadow_price'].astype(float) * ((1 + shadow_merged['DiscountRate'])**(shadow_merged['YEAR'].astype(int) - 2020))
+	shadow_merged['undiscounted_shadow_price_short_timeframe'] = shadow_merged['shadow_price'].astype(float) * ((1 + shadow_merged['DiscountRate'])**(shadow_merged['YEAR'].astype(int) - min_year))
+	# 2) With the timeframe used to discount variable, fixed, and emission costs
+	# Formula: discounted shadow price * (1 + discount rate)^(year - (min_year - time_step/2))
+	shadow_merged['undiscounted_shadow_price_long_timeframe'] = shadow_merged['shadow_price'].astype(float) * ((1 + shadow_merged['DiscountRate'])**(shadow_merged['YEAR'].astype(int) - (min_year - time_step/2)))
 
 	# Save the shadow prices to a csv file.
 	shadow_merged.to_csv(os.path.join(output_path, f'{scenario_name}_shadow_prices.csv'), index=True)
