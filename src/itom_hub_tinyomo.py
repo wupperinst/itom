@@ -196,11 +196,17 @@ class itom_hub_tinyomo(object):
 		self.AnnualEmissionLimit = Param(self.REGION, self.EMISSION, self.YEAR, default=self.HighMaxDefault,
 										 ParamName='AnnualEmissionLimit', ParamsGroup=self.AllParams)
 
+		self.TotalAnnualEmissionLimit = Param(self.EMISSION, self.YEAR, default=self.HighMaxDefault,
+											  ParamName='TotalAnnualEmissionLimit', ParamsGroup=self.AllParams)
+
 		self.ModelPeriodExogenousEmission = Param(self.REGION, self.EMISSION, default=0,
 												  ParamName='ModelPeriodExogenousEmission', ParamsGroup=self.AllParams)
 
 		self.ModelPeriodEmissionLimit = Param(self.REGION, self.EMISSION, default=self.HighMaxDefault,
 											  ParamName='ModelPeriodEmissionLimit', ParamsGroup=self.AllParams)
+
+		self.TotalAnnualEmissionLimit = Param(self.EMISSION, self.YEAR, default=self.HighMaxDefault,
+											  ParamName='TotalAnnualEmissionLimit', ParamsGroup=self.AllParams)
 
 		################
 		#   Variables  #
@@ -635,6 +641,14 @@ class itom_hub_tinyomo(object):
 														rule=self.E10_ModelPeriodEmissionsLimit_rule,
 														ConsName="E10_ModelPeriodEmissionsLimit",
 														ConsGroup=self.AllCons)
+
+		self.E11_TotalAnnualEmissionsLimit = Constraint(self.EMISSION, self.YEAR, 
+												  		rule=self.E11_TotalAnnualEmissionsLimit_rule,
+														ConsName="E11_TotalAnnualEmissionsLimit", ConsGroup=self.AllCons)
+
+		self.E12_TotalModelPeriodEmissionsLimit = Constraint(self.EMISSION, 
+													   		rule=self.E12_TotalModelPeriodEmissionsLimit_rule,
+															ConsName="E12_TotalModelPeriodEmissionsLimit", ConsGroup=self.AllCons)
 
 	###########
 	# METHODS #
@@ -2117,6 +2131,41 @@ class itom_hub_tinyomo(object):
 		if self.ModelPeriodEmissionLimit.get_value(r, e) != self.HighMaxDefault:
 			lhs = [(1, self.ModelPeriodEmissions.get_index_label(r, e))]
 			rhs = self.ModelPeriodEmissionLimit.get_value(r, e)
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
+		else:
+			return None
+
+	def E11_TotalAnnualEmissionsLimit_rule(self, e, y):
+		"""
+		*Constraint:* for each emission type and year total emissions over all
+		regions should be lower than the emission limit entered by the analyst.
+		::
+			sum(AnnualEmissions(r, e, y) for r in REGION) <= TotalAnnualEmissionLimit(e, y) - sum(AnnualExogenousEmission(r, e, y) for r in REGION)
+		"""
+
+		if self.TotalAnnualEmissionLimit.get_value(e, y) != self.HighMaxDefault:
+			lhs = [(1, [self.AnnualEmissions.get_index_label(r, e, y) for r in self.REGION.data.VALUE])]
+			rhs = [(1, self.TotalAnnualEmissionLimit.get_value(e, y)),
+					(-1, [self.AnnualExogenousEmission.get_value(r, e, y) for r in self.REGION.data.VALUE])]
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
+		else:
+			return None
+
+	def E12_TotalModelPeriodEmissionsLimit_rule(self, e):
+		"""
+		*Constraint:* for each emission type total emissions over all regions
+		and the whole emission period should be lower than the emission limit
+		entered by the analyst.
+		::
+
+			sum(ModelPeriodEmissions(r, e) for r in REGION) <= TotalModelPeriodEmissionLimit(e)
+		"""
+
+		if self.TotalModelPeriodEmissionLimit.get_value(e) != self.HighMaxDefault:
+			lhs = [(1, [self.ModelPeriodEmissions.get_index_label(r, e) for r in self.REGION.data.VALUE])]
+			rhs = self.TotalModelPeriodEmissionLimit.get_value(e)
 			sense = '<='
 			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 		else:
