@@ -152,6 +152,9 @@ class itom_hub_tinyomo(object):
 											ParamName='TotalAnnualMaxCapacity', ParamsGroup=self.AllParams)
 		self.TotalAnnualMinCapacity = Param(self.REGION, self.TECHNOLOGY, self.YEAR, default=0,
 											ParamName='TotalAnnualMinCapacity', ParamsGroup=self.AllParams)
+		
+		self.TotalAnnualMaxNewCapacity = Param(self.TECHNOLOGY, self.YEAR, default=self.HighMaxDefault,
+											   ParamName='TotalAnnualMaxNewCapacity', ParamsGroup=self.AllParams)
 
 		#########			Investment Constraints		#############
 
@@ -553,6 +556,11 @@ class itom_hub_tinyomo(object):
 																		rule=self.NCC2_LocalTotalAnnualMinNewCapacityConstraint_rule,
 																		ConsName="NCC2_LocalTotalAnnualMinNewCapacityConstraint",
 																		ConsGroup=self.AllCons)
+
+		self.NCC3_TotalAnnualMaxNewCapacityConstraint = Constraint(self.TECHNOLOGY, self.YEAR,
+																rule=self.NCC3_TotalAnnualMaxNewCapacityConstraint_rule,
+																ConsName="NCC3_TotalAnnualMaxNewCapacityConstraint",
+																ConsGroup=self.AllCons)
 
 		#########   		Annual Activity Constraints	##############
 
@@ -1795,6 +1803,21 @@ class itom_hub_tinyomo(object):
 				return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 			else:
 				return None
+		else:
+			return None
+
+	def NCC3_TotalAnnualMaxNewCapacityConstraint_rule(self, t, y):
+		"""
+		*Constraint:* there can be a maximum limit on new commissioned capacity
+        for a particular technology and year (sum of all regions).
+
+		sum(NewCapacity(r, t, y) for r in REGION) <= TotalAnnualMaxNewCapacity(t, y)
+		"""
+		if self.TotalAnnualMaxNewCapacity.get_value(t, y) != self.HighMaxDefault:
+			lhs = [(1, [self.NewCapacity.get_index_label(r, t, y) for r in self.REGION.data.VALUE])]
+			rhs = self.TotalAnnualMaxNewCapacity.get_value(t, y)
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 		else:
 			return None
 
