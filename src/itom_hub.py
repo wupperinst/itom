@@ -162,6 +162,7 @@ class abstract_itom_hub(object):
 #        self.model.CapacityOfOneTechnologyUnit = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=0)
         self.model.TotalAnnualMaxCapacity = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=self.HighMaxDefault)
         self.model.TotalAnnualMinCapacity = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=0)
+        self.model.TotalAnnualMaxNewCapacity = Param(self.model.TECHNOLOGY, self.model.YEAR, default=self.HighMaxDefault)
 
         #########			Investment Constraints		#############
 
@@ -380,6 +381,7 @@ class abstract_itom_hub(object):
 
         self.model.NCC2_LocalTotalAnnualMinNewCapacityConstraint = Constraint(self.model.LOCATION, self.model.TECHNOLOGY, self.model.YEAR, rule=self.NCC2_LocalTotalAnnualMinNewCapacityConstraint_rule)
 
+        self.model.NCC3_TotalAnnualMaxNewCapacityConstraint = Constraint(self.model.TECHNOLOGY, self.model.YEAR, rule=self.NCC3_TotalAnnualMaxNewCapacityConstraint_rule)   
 
         #########   		Annual Activity Constraints	##############
 
@@ -977,6 +979,16 @@ class abstract_itom_hub(object):
                 return Constraint.Skip
         else:
                 return Constraint.Skip
+
+    def NCC3_TotalAnnualMaxNewCapacityConstraint_rule(self, model,t,y):
+        '''
+        *Constraint:* there can be a maximum limit on new commissioned capacity
+        for a particular technology and year (sum of all regions).
+        '''
+        if self.model.TotalAnnualMaxNewCapacity[t,y] != self.HighMaxDefault:
+            return sum(self.model.NewCapacity[r,t,y] for r in self.model.REGION) <= self.model.TotalAnnualMaxNewCapacity[t,y]
+        else:
+            return Constraint.Skip
 
     #########   		Annual Activity Constraints	##############
 
