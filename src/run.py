@@ -49,7 +49,9 @@ t0 = time.time()
 
 parser = argparse.ArgumentParser(description='Prepare input data for edm-I.')
 parser.add_argument('-s', '--scenario', dest='scenario', type=str, help='scenario names')
-# parser.add_argument('-d', '--output_dir', dest='output_dir', type=str, default='/work/Itom', help='Base path to output files (optional, defaults to /work/Itom)')
+parser.add_argument('-c', '--scope', dest='scope', type=str,
+                    default='all', choices=['all', 'prepare_input', 'build_lp', 'solve_lp', 'build_and_solve_lp'],
+                    help='which steps of the model run to execute')
 args = parser.parse_args()
 
 ###############################################################################
@@ -112,41 +114,42 @@ opt = SolverFactory(config['solver']['name'])
 
 ###############################################################################
 # INPUT DATA
-print('Build input datasets...')
+if args.scope in ['all', 'prepare_input']:
+    print('Build input datasets...')
 
-# NOTE:
-# Sheets from the Excel file are exported TWICE to csv!
-# This is because the LOCATION and LocalResidualCapacity_prelim data are needed
-# to build the other input data.
+    # NOTE:
+    # Sheets from the Excel file are exported TWICE to csv!
+    # This is because the LOCATION and LocalResidualCapacity_prelim data are needed
+    # to build the other input data.
 
-# Get SETS and PARAMETERS from Excel file
-print('Get input data from Excel...')
-input_xlsx = os.path.join(os.pardir, input_path, config['model_run_code'] + '_input.xlsx')
-csv_path = input_path
-xlsx2csv(input_xlsx, csv_path)
+    # Get SETS and PARAMETERS from Excel file
+    print('Get input data from Excel...')
+    input_xlsx = os.path.join(os.pardir, input_path, config['model_run_code'] + '_input.xlsx')
+    csv_path = input_path
+    xlsx2csv(input_xlsx, csv_path)
 
-print('Build transport links...')
-# Build TransportRoute and TransportCapacity parameters
-years = pd.read_csv(os.path.join(input_path, 'YEAR.csv'))
-config['years'] = years['YEAR'].values.tolist()
-df_tr_route, df_tr_cap = _build_transport_params(config, input_path)
-df_tr_route.to_csv(os.path.join(input_path, 'TransportRoute.csv'), index=False)
-df_tr_cap.to_csv(os.path.join(input_path, 'TransportCapacity.csv'), index=False)
+    print('Build transport links...')
+    # Build TransportRoute and TransportCapacity parameters
+    years = pd.read_csv(os.path.join(input_path, 'YEAR.csv'))
+    config['years'] = years['YEAR'].values.tolist()
+    df_tr_route, df_tr_cap = _build_transport_params(config, input_path)
+    df_tr_route.to_csv(os.path.join(input_path, 'TransportRoute.csv'), index=False)
+    df_tr_cap.to_csv(os.path.join(input_path, 'TransportCapacity.csv'), index=False)
 
-# Get SETS and PARAMETERS from Excel file (again)
-input_xlsx = os.path.join(os.pardir, input_path, config['model_run_code'] + '_input.xlsx')
-csv_path = input_path
-xlsx2csv(input_xlsx, csv_path)
+    # Get SETS and PARAMETERS from Excel file (again)
+    input_xlsx = os.path.join(os.pardir, input_path, config['model_run_code'] + '_input.xlsx')
+    csv_path = input_path
+    xlsx2csv(input_xlsx, csv_path)
 
-# Check input data for consistency
-print('Check consistency of input data...')
-#list of sets
-param_set_index= ['REGION', 'TECHNOLOGY', 'PRODUCT', 'MODE_OF_OPERATION',
-                  'TRANSPORTMODE', 'YEAR', 'EMISSION', 'LOCATION']
-check_input_data(input_path, param_set_index, config)
+    # Check input data for consistency
+    print('Check consistency of input data...')
+    #list of sets
+    param_set_index= ['REGION', 'TECHNOLOGY', 'PRODUCT', 'MODE_OF_OPERATION',
+                    'TRANSPORTMODE', 'YEAR', 'EMISSION', 'LOCATION']
+    check_input_data(input_path, param_set_index, config)
 
-t1 = time.time()
-print('Time to build input data:  ' + str(int(t1-t0)) + ' seconds')
+    t1 = time.time()
+    print('Time to build input data:  ' + str(int(t1-t0)) + ' seconds')
 
 ###############################################################################
 # MODEL RUN

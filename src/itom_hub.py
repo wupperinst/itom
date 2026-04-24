@@ -9,7 +9,7 @@ This module defines:
 @author: mathieusa
 '''
 
-__all__ = ('abstract_itom_hub')
+__all__ = ('abstract_itom_hub',)
 
 #from __future__ import division
 import os
@@ -162,6 +162,7 @@ class abstract_itom_hub(object):
 #        self.model.CapacityOfOneTechnologyUnit = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=0)
         self.model.TotalAnnualMaxCapacity = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=self.HighMaxDefault)
         self.model.TotalAnnualMinCapacity = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=0)
+        self.model.TotalAnnualMaxNewCapacity = Param(self.model.TECHNOLOGY, self.model.YEAR, default=self.HighMaxDefault)
 
         #########			Investment Constraints		#############
 
@@ -182,9 +183,11 @@ class abstract_itom_hub(object):
         self.model.EmissionsPenalty = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=0)
         self.model.AnnualExogenousEmission = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=0)
         self.model.AnnualEmissionLimit = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, default=self.HighMaxDefault)
+        self.model.TotalAnnualEmissionLimit = Param(self.model.EMISSION, self.model.YEAR, default=self.HighMaxDefault)
 #        self.model.AnnualEmissionLimit = Param(self.model.REGION, self.model.EMISSION, self.model.YEAR, mutable=True, default=self.HighMaxDefault) # Param(mutable=True) allows to change the value of this parameter dynamically after the parameter has been constructed.
         self.model.ModelPeriodExogenousEmission = Param(self.model.REGION, self.model.EMISSION, default=0)
         self.model.ModelPeriodEmissionLimit = Param(self.model.REGION, self.model.EMISSION, default=self.HighMaxDefault)
+        self.model.TotalModelPeriodEmissionLimit = Param(self.model.EMISSION, default=self.HighMaxDefault)        
 #        self.model.ModelPeriodEmissionLimit = Param(self.model.REGION, self.model.EMISSION, mutable=True, default=self.HighMaxDefault) # Param(mutable=True) allows to change the value of this parameter dynamically after the parameter has been constructed.
 
         ######################
@@ -378,6 +381,7 @@ class abstract_itom_hub(object):
 
         self.model.NCC2_LocalTotalAnnualMinNewCapacityConstraint = Constraint(self.model.LOCATION, self.model.TECHNOLOGY, self.model.YEAR, rule=self.NCC2_LocalTotalAnnualMinNewCapacityConstraint_rule)
 
+        self.model.NCC3_TotalAnnualMaxNewCapacityConstraint = Constraint(self.model.TECHNOLOGY, self.model.YEAR, rule=self.NCC3_TotalAnnualMaxNewCapacityConstraint_rule)   
 
         #########   		Annual Activity Constraints	##############
 
@@ -420,6 +424,10 @@ class abstract_itom_hub(object):
         self.model.E9_AnnualEmissionsLimit = Constraint(self.model.REGION, self.model.EMISSION, self.model.YEAR, rule=self.E9_AnnualEmissionsLimit_rule)
 
         self.model.E10_ModelPeriodEmissionsLimit = Constraint(self.model.REGION, self.model.EMISSION, rule=self.E10_ModelPeriodEmissionsLimit_rule)
+
+        self.model.E11_TotalAnnualEmissionsLimit = Constraint(self.model.EMISSION, self.model.YEAR, rule=self.E11_TotalAnnualEmissionsLimit_rule)
+
+        self.model.E12_TotalModelPeriodEmissionsLimit = Constraint(self.model.EMISSION, rule=self.E12_TotalModelPeriodEmissionsLimit_rule)
 
     ###########
     # METHODS #
@@ -972,6 +980,16 @@ class abstract_itom_hub(object):
         else:
                 return Constraint.Skip
 
+    def NCC3_TotalAnnualMaxNewCapacityConstraint_rule(self, model,t,y):
+        '''
+        *Constraint:* there can be a maximum limit on new commissioned capacity
+        for a particular technology and year (sum of all regions).
+        '''
+        if self.model.TotalAnnualMaxNewCapacity[t,y] != self.HighMaxDefault:
+            return sum(self.model.NewCapacity[r,t,y] for r in self.model.REGION) <= self.model.TotalAnnualMaxNewCapacity[t,y]
+        else:
+            return Constraint.Skip
+
     #########   		Annual Activity Constraints	##############
 
     def AAC0_LocalAnnualTechnologyActivity_rule(self, model,l,t,y):
@@ -1150,6 +1168,27 @@ class abstract_itom_hub(object):
         '''
         if self.model.ModelPeriodEmissionLimit[r,e] != self.HighMaxDefault:
             return self.model.ModelPeriodEmissions[r,e] <= self.model.ModelPeriodEmissionLimit[r,e]
+        else:
+            return Constraint.Skip
+
+    def E11_TotalAnnualEmissionsLimit_rule(self, model,e,y):
+        '''
+        *Constraint:* for each emission type, and year total emissions 
+        should be lower than the emission limit entered by the analyst.
+        '''
+        if self.model.TotalAnnualEmissionLimit[e,y] != self.HighMaxDefault:
+            return sum(self.model.AnnualEmissions[r,e,y] + self.model.AnnualExogenousEmission[r,e,y] for r in self.model.REGION) <= self.model.TotalAnnualEmissionLimit[e,y]
+        else:
+            return Constraint.Skip
+
+    def E12_TotalModelPeriodEmissionsLimit_rule(self, model,e):
+        '''
+        *Constraint:* for each emission type total emissions over the 
+        whole emission period should be lower than the emission limit entered by 
+        the analyst.
+        '''
+        if self.model.TotalModelPeriodEmissionLimit[e] != self.HighMaxDefault:
+            return sum(self.model.ModelPeriodEmissions[r,e] for r in self.model.REGION) <= self.model.TotalModelPeriodEmissionLimit[e]
         else:
             return Constraint.Skip
 

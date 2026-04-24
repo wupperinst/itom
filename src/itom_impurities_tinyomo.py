@@ -9,7 +9,7 @@ This module defines:
 @author: mathieusa, alexanderkl
 """
 
-__all__ = ('itom_hub_retrofit_impurities_tinyomo')
+__all__ = ('itom_hub_retrofit_impurities_tinyomo',)
 
 from tinyomo import NonNegativeReals, Reals, Set, Param, Var, Constraint
 from itom_retrofit_tinyomo import itom_hub_retrofit_tinyomo
@@ -70,9 +70,10 @@ class itom_hub_retrofit_impurities_tinyomo(itom_hub_retrofit_tinyomo):
 		*Constraint:* some technologies generate "by-products" that actually represent impurities in the main product
 		(e.g. Cu in steel). The parameter MaxImpurity defines the impurity limit (share) tolerated for a given product.
 		In this constraint, for technologies where materials of different grades are mixed, the final product's
-		impurity content should be be smaller than MaxImpurity rate applied to
+		impurity content should be be smaller than MaxImpurity rate applied to the production of the main product.
+		::
 
-		LocalProductionByTechnology(l,t,i,y) <= MaxImpurity(p,i)* LocalProductionByTechnology(l,t,p,y))
+			LocalProductionByTechnology(l,t,i,y) <= MaxImpurity(p,i)* LocalProductionByTechnology(l,t,p,y))
 
 		"""
 
