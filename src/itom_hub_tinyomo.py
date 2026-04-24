@@ -143,14 +143,9 @@ class itom_hub_tinyomo(object):
 
 		self.TransportCostByMode = Param(self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
 										 ParamName='TransportCostByMode', ParamsGroup=self.AllParams)
-		
-		if self.config['tr_interreg_costs'] == "not_product_specific":
-			self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
+		self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
 											ParamName='TransportCostInterReg', ParamsGroup=self.AllParams)
-		elif self.config['tr_interreg_costs'] == "product_specific":
-			self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.PRODUCT, self.YEAR, default=0.0, 
-											ParamName='TransportCostInterReg', ParamsGroup=self.AllParams)
-									  	
+
 		#########			Capacity Constraints		#############
 
 		self.TotalAnnualMaxCapacity = Param(self.REGION, self.TECHNOLOGY, self.YEAR, default=self.HighMaxDefault,
@@ -1593,58 +1588,30 @@ class itom_hub_tinyomo(object):
 			rhs = 0
 			sense = '=='
 		else: # for HubLocation[l]==1
-			
-			if self.config['tr_interreg_costs'] == 'not_product_specific':
-				lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
+			lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
 
-					([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
-								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-						for ll in self.LOCATION.data.VALUE
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+				([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
+							* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+					for ll in self.LOCATION.data.VALUE
+					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
-						[self.Transport.get_index_label(ll, l, p, tr, y)
-						for ll in self.LOCATION.data.VALUE
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
+					[self.Transport.get_index_label(ll, l, p, tr, y)
+					for ll in self.LOCATION.data.VALUE
+					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
 
-					([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, y)
-								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-								* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
-						for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+				([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, y)
+							* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+							* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
+					for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
+					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
-						[self.Transport.get_index_label(ll, l, p, tr, y)
-						for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
-				
-			elif self.config['tr_interreg_costs'] == 'product_specific':
-				lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
-
-					([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
-								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-						for ll in self.LOCATION.data.VALUE
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
-
-						[self.Transport.get_index_label(ll, l, p, tr, y)
-						for ll in self.LOCATION.data.VALUE
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
-
-					([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, p, y)
-								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-								* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
-						for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
-
-						[self.Transport.get_index_label(ll, l, p, tr, y)
-						for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
-						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
+					[self.Transport.get_index_label(ll, l, p, tr, y)
+					for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
+					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
 			rhs = 0
 			sense = '=='
 		return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
