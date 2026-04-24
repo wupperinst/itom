@@ -81,7 +81,7 @@ class abstract_itom_hub(object):
             - y = YEAR
 
     '''
-    def __init__(self, InputPath=None):
+    def __init__(self, InputPath=None, tr_interreg_costs="not_product_specific"):
 
         # Instantiate pyomo's AbstractModel
         self.model = AbstractModel()
@@ -89,7 +89,8 @@ class abstract_itom_hub(object):
         self.data = DataPortal()
         # Path to directory of csv input data files (optional)
         self.InputPath = InputPath
-
+        # Inter-regional transport costs can be "not_product_specific" (default, legacy) or "product_specific".
+        self.tr_interreg_costs = tr_interreg_costs
         # High default max value for inequality constraints
         # The point is to actually skip such constraints (bounds are enough)
         # to reduce the size of the LP problem.
@@ -155,7 +156,10 @@ class abstract_itom_hub(object):
         self.model.FixedCost = Param(self.model.REGION, self.model.TECHNOLOGY, self.model.YEAR, default=0)
 
         self.model.TransportCostByMode = Param(self.model.REGION, self.model.TRANSPORTMODE, self.model.YEAR, default=0.0)
-        self.model.TransportCostInterReg = Param(self.model.REGION, self.model.REGION, self.model.TRANSPORTMODE, self.model.YEAR, default=0.0)
+        if self.tr_interreg_costs == "not_product_specific":
+            self.model.TransportCostInterReg = Param(self.model.REGION, self.model.REGION, self.model.TRANSPORTMODE, self.model.YEAR, default=0.0)
+        else: # tr_interreg_costs == "product_specific"
+            self.model.TransportCostInterReg = Param(self.model.REGION, self.model.REGION, self.model.TRANSPORTMODE, self.model.PRODUCT, self.model.YEAR, default=0.0)
 
         #########			Capacity Constraints		#############
 
@@ -879,9 +883,12 @@ class abstract_itom_hub(object):
         if self.model.HubLocation[l]==0:
             return self.model.LocalTransportCost[l,p,y] == sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostByMode[r,tr,y] * self.model.Geography[r,l] for r in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION)
         else:
-            return self.model.LocalTransportCost[l,p,y] == (sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostByMode[r,tr,y] * self.model.Geography[r,l] for r in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION)
+            if self.tr_interreg_costs == "not_product_specific":
+                return self.model.LocalTransportCost[l,p,y] == (sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostByMode[r,tr,y] * self.model.Geography[r,l] for r in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION)
                                                             + sum(sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostInterReg[rr,r,tr,y] * self.model.Geography[r,l] for r in self.model.REGION) * self.model.Geography[rr,ll] for rr in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION if self.model.HubLocation[ll]==1))
-
+            else: # if tr_interreg_costs == "product_specific":
+                return self.model.LocalTransportCost[l,p,y] == (sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostByMode[r,tr,y] * self.model.Geography[r,l] for r in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION)
+                                                            + sum(sum(sum(self.model.Transport[ll,l,p,tr,y] * sum(self.model.TransportCostInterReg[rr,r,tr,p,y] * self.model.Geography[r,l] for r in self.model.REGION) * self.model.Geography[rr,ll] for rr in self.model.REGION) for tr in [trm for trm in self.model.TRANSPORTMODE if self.model.TransportRoute[ll,l,p,trm,y]==1]) for ll in self.model.LOCATION if self.model.HubLocation[ll]==1))
 
     def TC2_DiscountedLocalTransportCosts_rule(self, model,l,p,y):
         '''
