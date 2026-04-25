@@ -213,8 +213,8 @@ class itom_hub_tinyomo(object):
 		self.ModelPeriodEmissionLimit = Param(self.REGION, self.EMISSION, default=self.HighMaxDefault,
 											  ParamName='ModelPeriodEmissionLimit', ParamsGroup=self.AllParams)
 
-		self.TotalAnnualEmissionLimit = Param(self.EMISSION, self.YEAR, default=self.HighMaxDefault,
-											  ParamName='TotalAnnualEmissionLimit', ParamsGroup=self.AllParams)
+		self.TotalModelPeriodEmissionLimit = Param(self.EMISSION, default=self.HighMaxDefault,
+											  ParamName='TotalModelPeriodEmissionLimit', ParamsGroup=self.AllParams)
 
 		################
 		#   Variables  #
