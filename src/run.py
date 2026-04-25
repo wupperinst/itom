@@ -25,7 +25,7 @@ from pyomo.environ import value
 from helpers.directory_check import check_directory
 from helpers.data2csv import xlsx2csv
 from helpers.debug_util import debug_infeas
-from helpers.build_input_data import _build_transport_params
+from helpers.build_input_data import _build_transport_params, _check_backward_compatibility_transport_cost
 from helpers.input_data_check import check_input_data
 
 from itom import abstract_itom, concrete_itom
@@ -143,6 +143,11 @@ if args.scope in ['all', 'prepare_input']:
     csv_path = input_path
     xlsx2csv(input_xlsx, csv_path)
 
+    print('Ensure backward compatibility of TransportCostInterReg...')
+    # Check if TransportCostInterReg parameter is indexed by product (sota) or not (legacy)
+    tr_interreg_costs = _check_backward_compatibility_transport_cost(config, input_path)
+    config['tr_interreg_costs'] = tr_interreg_costs
+
     # Check input data for consistency
     print('Check consistency of input data...')
     #list of sets
@@ -167,16 +172,16 @@ if args.scope in ['all', 'build_lp', 'solve_lp', 'build_and_solve_lp']:
         # Configuration for abstract model
         if not config['processes']['retrofit'] and not config['transport']['hub']:
             print('Building abstract model: NO retrofit, NO transport hub')
-            am = abstract_itom(InputPath=input_path) # Create an abstract model
+            am = abstract_itom(InputPath=input_path, tr_interreg_costs=config['tr_interreg_costs']) # Create an abstract model
         elif not config['processes']['retrofit'] and config['transport']['hub']:
             print('Building abstract model: NO retrofit, WITH transport hub')
-            am = abstract_itom_hub(InputPath=input_path) # Create an abstract model
+            am = abstract_itom_hub(InputPath=input_path, tr_interreg_costs=config['tr_interreg_costs']) # Create an abstract model
         elif config['processes']['retrofit'] and not config['transport']['hub']:
             print('Building abstract model: WITH retrofit, NO transport hub')
-            am = abstract_itom_retrofit(InputPath=input_path) # Create an abstract model
+            am = abstract_itom_retrofit(InputPath=input_path, tr_interreg_costs=config['tr_interreg_costs']) # Create an abstract model
         else:
             print('Building abstract model: WITH retrofit, WITH transport hub, WITH impurities')
-            am = abstract_itom_hub_retrofit_impurities(InputPath=input_path) # Create an abstract model
+            am = abstract_itom_hub_retrofit_impurities(InputPath=input_path, tr_interreg_costs=config['tr_interreg_costs']) # Create an abstract model
 
         am.load_data() # Load input data from csv files
         t2 = time.time()

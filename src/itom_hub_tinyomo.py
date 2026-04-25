@@ -143,15 +143,23 @@ class itom_hub_tinyomo(object):
 
 		self.TransportCostByMode = Param(self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
 										 ParamName='TransportCostByMode', ParamsGroup=self.AllParams)
-		self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
+		
+		if self.config['tr_interreg_costs'] == "not_product_specific":
+			self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.YEAR, default=0.0,
 											ParamName='TransportCostInterReg', ParamsGroup=self.AllParams)
-
+		elif self.config['tr_interreg_costs'] == "product_specific":
+			self.TransportCostInterReg = Param(self.REGION, self.REGION, self.TRANSPORTMODE, self.PRODUCT, self.YEAR, default=0.0, 
+											ParamName='TransportCostInterReg', ParamsGroup=self.AllParams)
+									  	
 		#########			Capacity Constraints		#############
 
 		self.TotalAnnualMaxCapacity = Param(self.REGION, self.TECHNOLOGY, self.YEAR, default=self.HighMaxDefault,
 											ParamName='TotalAnnualMaxCapacity', ParamsGroup=self.AllParams)
 		self.TotalAnnualMinCapacity = Param(self.REGION, self.TECHNOLOGY, self.YEAR, default=0,
 											ParamName='TotalAnnualMinCapacity', ParamsGroup=self.AllParams)
+		
+		self.TotalAnnualMaxNewCapacity = Param(self.TECHNOLOGY, self.YEAR, default=self.HighMaxDefault,
+											   ParamName='TotalAnnualMaxNewCapacity', ParamsGroup=self.AllParams)
 
 		#########			Investment Constraints		#############
 
@@ -196,11 +204,17 @@ class itom_hub_tinyomo(object):
 		self.AnnualEmissionLimit = Param(self.REGION, self.EMISSION, self.YEAR, default=self.HighMaxDefault,
 										 ParamName='AnnualEmissionLimit', ParamsGroup=self.AllParams)
 
+		self.TotalAnnualEmissionLimit = Param(self.EMISSION, self.YEAR, default=self.HighMaxDefault,
+											  ParamName='TotalAnnualEmissionLimit', ParamsGroup=self.AllParams)
+
 		self.ModelPeriodExogenousEmission = Param(self.REGION, self.EMISSION, default=0,
 												  ParamName='ModelPeriodExogenousEmission', ParamsGroup=self.AllParams)
 
 		self.ModelPeriodEmissionLimit = Param(self.REGION, self.EMISSION, default=self.HighMaxDefault,
 											  ParamName='ModelPeriodEmissionLimit', ParamsGroup=self.AllParams)
+
+		self.TotalAnnualEmissionLimit = Param(self.EMISSION, self.YEAR, default=self.HighMaxDefault,
+											  ParamName='TotalAnnualEmissionLimit', ParamsGroup=self.AllParams)
 
 		################
 		#   Variables  #
@@ -548,6 +562,11 @@ class itom_hub_tinyomo(object):
 																		ConsName="NCC2_LocalTotalAnnualMinNewCapacityConstraint",
 																		ConsGroup=self.AllCons)
 
+		self.NCC3_TotalAnnualMaxNewCapacityConstraint = Constraint(self.TECHNOLOGY, self.YEAR,
+																rule=self.NCC3_TotalAnnualMaxNewCapacityConstraint_rule,
+																ConsName="NCC3_TotalAnnualMaxNewCapacityConstraint",
+																ConsGroup=self.AllCons)
+
 		#########   		Annual Activity Constraints	##############
 
 		self.AAC0_LocalAnnualTechnologyActivity = Constraint(self.LOCATION, self.TECHNOLOGY, self.YEAR,
@@ -635,6 +654,14 @@ class itom_hub_tinyomo(object):
 														rule=self.E10_ModelPeriodEmissionsLimit_rule,
 														ConsName="E10_ModelPeriodEmissionsLimit",
 														ConsGroup=self.AllCons)
+
+		self.E11_TotalAnnualEmissionsLimit = Constraint(self.EMISSION, self.YEAR, 
+												  		rule=self.E11_TotalAnnualEmissionsLimit_rule,
+														ConsName="E11_TotalAnnualEmissionsLimit", ConsGroup=self.AllCons)
+
+		self.E12_TotalModelPeriodEmissionsLimit = Constraint(self.EMISSION, 
+													   		rule=self.E12_TotalModelPeriodEmissionsLimit_rule,
+															ConsName="E12_TotalModelPeriodEmissionsLimit", ConsGroup=self.AllCons)
 
 	###########
 	# METHODS #
@@ -1566,30 +1593,58 @@ class itom_hub_tinyomo(object):
 			rhs = 0
 			sense = '=='
 		else: # for HubLocation[l]==1
-			lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
+			
+			if self.config['tr_interreg_costs'] == 'not_product_specific':
+				lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
 
-				([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
-							* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-					for ll in self.LOCATION.data.VALUE
-					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+					([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
+								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+						for ll in self.LOCATION.data.VALUE
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
-					[self.Transport.get_index_label(ll, l, p, tr, y)
-					for ll in self.LOCATION.data.VALUE
-					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
+						[self.Transport.get_index_label(ll, l, p, tr, y)
+						for ll in self.LOCATION.data.VALUE
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
 
-				([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, y)
-							* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-							* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
-					for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
-					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+					([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, y)
+								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+								* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
+						for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
-					[self.Transport.get_index_label(ll, l, p, tr, y)
-					for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
-					for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
-								if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
+						[self.Transport.get_index_label(ll, l, p, tr, y)
+						for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
+				
+			elif self.config['tr_interreg_costs'] == 'product_specific':
+				lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
+
+					([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
+								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+						for ll in self.LOCATION.data.VALUE
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+
+						[self.Transport.get_index_label(ll, l, p, tr, y)
+						for ll in self.LOCATION.data.VALUE
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
+
+					([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, p, y)
+								* self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
+								* self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
+						for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
+
+						[self.Transport.get_index_label(ll, l, p, tr, y)
+						for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
+						for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+									if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
 			rhs = 0
 			sense = '=='
 		return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1781,6 +1836,21 @@ class itom_hub_tinyomo(object):
 				return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 			else:
 				return None
+		else:
+			return None
+
+	def NCC3_TotalAnnualMaxNewCapacityConstraint_rule(self, t, y):
+		"""
+		*Constraint:* there can be a maximum limit on new commissioned capacity
+        for a particular technology and year (sum of all regions).
+
+		sum(NewCapacity(r, t, y) for r in REGION) <= TotalAnnualMaxNewCapacity(t, y)
+		"""
+		if self.TotalAnnualMaxNewCapacity.get_value(t, y) != self.HighMaxDefault:
+			lhs = [(1, [self.NewCapacity.get_index_label(r, t, y) for r in self.REGION.data.VALUE])]
+			rhs = self.TotalAnnualMaxNewCapacity.get_value(t, y)
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 		else:
 			return None
 
@@ -2117,6 +2187,41 @@ class itom_hub_tinyomo(object):
 		if self.ModelPeriodEmissionLimit.get_value(r, e) != self.HighMaxDefault:
 			lhs = [(1, self.ModelPeriodEmissions.get_index_label(r, e))]
 			rhs = self.ModelPeriodEmissionLimit.get_value(r, e)
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
+		else:
+			return None
+
+	def E11_TotalAnnualEmissionsLimit_rule(self, e, y):
+		"""
+		*Constraint:* for each emission type and year total emissions over all
+		regions should be lower than the emission limit entered by the analyst.
+		::
+			sum(AnnualEmissions(r, e, y) for r in REGION) <= TotalAnnualEmissionLimit(e, y) - sum(AnnualExogenousEmission(r, e, y) for r in REGION)
+		"""
+
+		if self.TotalAnnualEmissionLimit.get_value(e, y) != self.HighMaxDefault:
+			lhs = [(1, [self.AnnualEmissions.get_index_label(r, e, y) for r in self.REGION.data.VALUE])]
+			rhs = [(1, self.TotalAnnualEmissionLimit.get_value(e, y)),
+					(-1, [self.AnnualExogenousEmission.get_value(r, e, y) for r in self.REGION.data.VALUE])]
+			sense = '<='
+			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
+		else:
+			return None
+
+	def E12_TotalModelPeriodEmissionsLimit_rule(self, e):
+		"""
+		*Constraint:* for each emission type total emissions over all regions
+		and the whole emission period should be lower than the emission limit
+		entered by the analyst.
+		::
+
+			sum(ModelPeriodEmissions(r, e) for r in REGION) <= TotalModelPeriodEmissionLimit(e)
+		"""
+
+		if self.TotalModelPeriodEmissionLimit.get_value(e) != self.HighMaxDefault:
+			lhs = [(1, [self.ModelPeriodEmissions.get_index_label(r, e) for r in self.REGION.data.VALUE])]
+			rhs = self.TotalModelPeriodEmissionLimit.get_value(e)
 			sense = '<='
 			return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 		else:

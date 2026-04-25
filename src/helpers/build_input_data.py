@@ -126,3 +126,22 @@ def _build_transport_params(config, input_path):
     df_tr_cap.rename({'LOCATION1':'LOCATION', 'LOCATION2':'LOCATION'}, axis='columns', inplace=True)
 
     return df_tr_route, df_tr_cap
+
+
+def _check_backward_compatibility_transport_cost(config, input_path):
+    '''
+    Check if TransportCostInterReg parameter is indexed by product, if not expand it to be indexed by product
+    '''
+
+    try:
+        df_tr_cost_interreg = pd.read_csv(os.path.join(input_path, 'TransportCostInterReg.csv'))
+        if 'PRODUCT' not in df_tr_cost_interreg.columns:
+            print("TransportCostInterReg is not product specific.")
+            return "not_product_specific"
+        else:
+            print("TransportCostInterReg is product specific.")
+            return "product_specific"
+
+    except FileNotFoundError:
+        print("File not found: TransportCostInterReg.csv => No need for backward compatibility check.")
+        return "not_product_specific"
