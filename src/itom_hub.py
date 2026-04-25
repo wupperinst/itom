@@ -9,7 +9,7 @@ This module defines:
 @author: mathieusa
 '''
 
-__all__ = ('abstract_itom_hub')
+__all__ = ('abstract_itom_hub',)
 
 #from __future__ import division
 import os

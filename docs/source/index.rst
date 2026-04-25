@@ -25,6 +25,10 @@
     :caption: Framework components
     :maxdepth: 3
     
-    components
+    concretemodel
+    corepyomo
+    extensionpyomo
+    coretinyomo
+    extensiontinyomo
 
 :ref:`genindex`

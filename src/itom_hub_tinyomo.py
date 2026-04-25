@@ -4,12 +4,12 @@
 This module defines:
 
 	- the `itom_hub_tinyomo` class that replaces a Pyomo ABSTRACT and CONCRETE model definition using classes from tinyomo
-	for the energy-intensive industry system, where locations are indirectly connected via a transport hub.
+	  for the energy-intensive industry system, where locations are indirectly connected via a transport hub.
 
 @author: mathieusa, alexanderkl
 '''
 
-__all__ = ('itom_hub_tinyomo')
+__all__ = ('itom_hub_tinyomo',)
 
 # from __future__ import division
 import os
@@ -683,9 +683,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Objective:* minimize total costs (capital, variable, fixed),
 		aggregated for all regions, cumulated over the modelling period.
+		::
 
-
-		sum(ModelPeriodCostByRegion(r) for r in REGION)
+			sum(ModelPeriodCostByRegion(r) for r in REGION)
 		"""
 
 		obj = [(1, [self.ModelPeriodCostByRegion.get_index_label(r) for r in self.REGION.data.VALUE])]
@@ -701,8 +701,9 @@ class itom_hub_tinyomo(object):
 		*Constraint:* the new capacity available at each location is
 		aggregated for each region. Note: this variable is only needed to
 		calculate SalvageValue, which we only define at the regional level.
-
-		NewCapacity == sum(LocalNewCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
+		::
+		
+		    NewCapacity == sum(LocalNewCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -722,10 +723,11 @@ class itom_hub_tinyomo(object):
 		*Constraint:* the accumulation of all new capacities of all technologies
 		invested during the model period is calculated for each year.
 		This is done first for each location.
-
-		LocalAccumulatedNewCapacity.(l, t, y)  == sum(LocalNewCapacity(l, t, yy)  for yy in YEAR
-												if ((y - yy < sum(OperationalLife(r, t) * Geography(r, l)
-												for r in REGION)) and (y - yy >= 0)))
+		::
+		
+			LocalAccumulatedNewCapacity(l, t, y) == sum(LocalNewCapacity(l, t, yy) for yy in YEAR
+				if ((y - yy < sum(OperationalLife(r, t) * Geography(r, l)
+				for r in REGION)) and (y - yy >= 0)))
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or \
@@ -745,8 +747,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the accumulated new capacity available at each location is
 		aggregated for each region.
+		::
 
-		AccumulatedNewCapacity(r, t, y) == sum(LocalAccumulatedNewCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
+			AccumulatedNewCapacity(r, t, y) == sum(LocalAccumulatedNewCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -767,8 +770,9 @@ class itom_hub_tinyomo(object):
 		capacity and residual capacity in each year of the modeling period,
 		the total annual capacity for each technology is determined. This is done
 		for each location in the modeling period.
+		::
 
-		LocalAccumulatedNewCapacity(l, t, y)  + LocalResidualCapacity(l, t, y) == LocalTotalCapacity(l, t, y)
+			LocalAccumulatedNewCapacity(l, t, y)  + LocalResidualCapacity(l, t, y) == LocalTotalCapacity(l, t, y)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -785,9 +789,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the total capacity available at each location is
 		aggregated for each region.
+		::
 
-		TotalCapacity(r, t, y) == sum(
-			LocalTotalCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
+			TotalCapacity(r, t, y) == sum(
+				LocalTotalCapacity(l, t, y) * Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -808,10 +813,11 @@ class itom_hub_tinyomo(object):
 		production (rate of activity during any year) has to be less than
 		their total available capacity multiplied by the fraction of the year
 		for which the technology is available.
+		::
 
-		LocalActivity(l, t, y) <= LocalTotalCapacity(l, t, y) * sum(
-				AvailabilityFactor(r, t, y) * CapacityToActivityUnit(r, t) *
-				Geography.(r, l) for r in REGION)
+			LocalActivity(l, t, y) <= LocalTotalCapacity(l, t, y) * sum(
+				AvailabilityFactor(r, t, y) * CapacityToActivityUnit(r, t) 
+				\* Geography.(r, l) for r in REGION)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -833,11 +839,12 @@ class itom_hub_tinyomo(object):
 		*Constraint:* the production or output (of a `product`) for each technology,
 		in each mode of operation is determined by multiplying the (rate of) activity
 		to a product output vs. production activity ratio entered by the analyst.
+		::
 
-		LocalProductionByMode.(l, t, p, m, y) == \
-					LocalActivityByMode(l, t, m, y) * sum(
-					OutputActivityRatio(r, t, p, m, y) * Geography(r, l) for r in
-					REGION)
+			LocalProductionByMode.(l, t, p, m, y) == 
+				LocalActivityByMode(l, t, m, y) * sum(
+				OutputActivityRatio(r, t, p, m, y) 
+				\* Geography(r, l) for r in REGION)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -859,9 +866,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the production or output (of a `product`) for each technology
 		is the sum of production in each operation mode.
+		::
 
-		LocalProductionByTechnology.(l, t, p, y)== sum(
-					LocalProductionByMode(l, t, p, m, y) for m in ModeOfOperation)
+			LocalProductionByTechnology.(l, t, p, y)== sum(
+				LocalProductionByMode(l, t, p, m, y) for m in ModeOfOperation)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -884,9 +892,10 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product, year and location, the production by each
 		technology is added to determine the total local production of
 		each product.
+		::
 
-		LocalProduction(l, p, y) == sum(
-			LocalProductionByTechnology(l, t, p, y) for t in RelevantTechnology)
+			LocalProduction(l, p, y) == sum(
+				LocalProductionByTechnology(l, t, p, y) for t in RelevantTechnology)
 		'''
 
 		if self.HubLocation.get_value(l) == 1:
@@ -905,9 +914,10 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product, year and region, the production by each
 		location is added to determine the total regional production of
 		each product.
+		::
 
-		 Production(r, p, y) == sum(
-			LocalProduction(l, p, y) * Geography(r, l) for l in LOCATION)
+			Production(r, p, y) == sum(
+				LocalProduction(l, p, y) * Geography(r, l) for l in LOCATION)
 		"""
 
 		lhs = [(1, self.Production.get_index_label(r, p, y)),
@@ -930,9 +940,10 @@ class itom_hub_tinyomo(object):
 		*Constraint:* the use or input (of a `product`) for each technology, in
 		each mode of operation is determined by multiplying the (rate of) activity
 		to a product input vs. production activity ratio entered by the analyst.
+		::
 
-		LocalUseByMode(l, t, p, m, y) == LocalActivityByMode(l, t, m, y) * sum(
-					InputActivityRatio(r, t, p, m, y) * Geography(r, l) for r in REGION)
+			LocalUseByMode(l, t, p, m, y) == LocalActivityByMode(l, t, m, y) * sum(
+				InputActivityRatio(r, t, p, m, y) * Geography(r, l) for r in REGION)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -954,9 +965,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the use or input (of a `product`) for each technology
 		is the sum of use in each operation mode.
+		::
 
-		LocalUseByTechnology(l, t, p, y) == sum(
-					LocalUseByMode(l, t, p, m, y) for m in ModeOfOperation)
+			LocalUseByTechnology(l, t, p, y) == sum(
+				LocalUseByMode(l, t, p, m, y) for m in ModeOfOperation)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -978,8 +990,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each product, year and location, the use by each
 		technology is added to determine the total local use of each product.
+		::
 
-		LocalUse(l, p, y) == sum(LocalUseByTechnology(l, t, p, y) for t in RelevantTechnology)
+			LocalUse(l, p, y) == sum(LocalUseByTechnology(l, t, p, y) for t in RelevantTechnology)
 		"""
 
 		if self.HubLocation.get_value(l) == 1:
@@ -998,8 +1011,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each product, year and region, the use by each
 		location is added to determine the total regional use of each product.
+		::
 
-		Use(r, p, y) == sum(LocalUse(l, p, y) * Geography(r, l) for l in LOCATION)
+			Use(r, p, y) == sum(LocalUse(l, p, y) * Geography(r, l) for l in LOCATION)
 		"""
 
 		lhs = [(1, self.Use.get_index_label(r, p, y)),
@@ -1014,8 +1028,9 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product, in each year, and region the total production
 		of each product + imports from locations outside the region - exports to
 		locations outside the region should be larger than or equal to demand.
+		::
 
-		Production(r, p, y) + Import(r, p, y) - Export(r, p, y) >= Demand(r, p, y)
+			Production(r, p, y) + Import(r, p, y) - Export(r, p, y) >= Demand(r, p, y)
 		"""
 
 		lhs = [(1, self.Production.get_index_label(r, p, y)),
@@ -1034,10 +1049,11 @@ class itom_hub_tinyomo(object):
 		link capacity if a transport route exists, or 0 if there is no route.
 		For bi-directional transport routes, the sum of transport in both directions should
 		be smaller or equal to the transport link capacity.
+		::
 
-		Transport(l, ll, p, tr, y) <= TransportCapacity(l, ll, p, tr, y) * TransportCapacityToActivity(tr)
+			Transport(l, ll, p, tr, y) <= TransportCapacity(l, ll, p, tr, y) * TransportCapacityToActivity(tr)
 
-		Transport(l, ll, p, tr, y) + Transport(ll, l, p, tr, y) <= TransportCapacity(l, ll, p, tr, y) * TransportCapacityToActivity(tr)
+			Transport(l, ll, p, tr, y) + Transport(ll, l, p, tr, y) <= TransportCapacity(l, ll, p, tr, y) * TransportCapacityToActivity(tr)
 		"""
 		if self.TransportCapacity.get_value(l,ll,p,tr,y) != self.HighMaxDefault:
 			if self.TransportRoute.get_value(l, ll, p, tr, y) == 1 and self.TransportRoute.get_value(ll, l, p, tr,
@@ -1081,17 +1097,18 @@ class itom_hub_tinyomo(object):
 		TransportCapacity, the same total max capacity is given for each relevant product.
 		For bi-directional transport routes, the sum of transport in both directions should
 		be smaller or equal to the transport link capacity.
+		::
 
-		(sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-							<= 1 / len(RELEVANT_PRODUCT_to_ll)
-							* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-							* TransportCapacityToActivity(tr))
+		    (sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+		    <= 1 / len(RELEVANT_PRODUCT_to_ll)
+		    \* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+		    \* TransportCapacityToActivity(tr))
 
-		(sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-							+ sum(Transport(ll, l, p, tr, y) for p in RELEVANT_PRODUCT_from_ll)
-							<= 1 / len(RELEVANT_PRODUCT_to_ll)
-							* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-							* TransportCapacityToActivity(tr))
+		    (sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+			+ sum(Transport(ll, l, p, tr, y) for p in RELEVANT_PRODUCT_from_ll)
+			<= 1 / len(RELEVANT_PRODUCT_to_ll)
+			\* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+			\* TransportCapacityToActivity(tr))
 		"""
 
 		if self.MultiPurposeTransport.get_value(tr) == 1:
@@ -1132,12 +1149,13 @@ class itom_hub_tinyomo(object):
 		quantity of product transported to other locations is equal to the
 		production at the (origin) location. If there is no transport link at all
 		departing from the (origin) location, the constraint is skipped.
+		::
 
-		sum(sum(Transport(l, ll, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
-							TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) <= LocalProduction(l, p, y)
+			sum(sum(Transport(l, ll, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
+				TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) <= LocalProduction(l, p, y)
 
-		sum(sum(Transport(l, ll, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
-							TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) == LocalProduction(l, p, y)
+			sum(sum(Transport(l, ll, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
+				TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) == LocalProduction(l, p, y)
 		"""
 
 		if self.HubLocation.get_value(l) == 0:
@@ -1164,9 +1182,10 @@ class itom_hub_tinyomo(object):
 		quantity of product transported from other locations equal to the use
 		at the (destination) location. If there is no transport link at all
 		arriving to the (destination) location, the constraint is skipped.
+		::
 
-		sum(sum(Transport(ll, l, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
-			TransportRoute(ll, l, p, trm, y) == 1]) for ll in LOCATION) == LocalUse(l, p, y)
+			sum(sum(Transport(ll, l, p, tr, y) for tr in [trm for trm in TRANSPORTMODE if
+				TransportRoute(ll, l, p, trm, y) == 1]) for ll in LOCATION) == LocalUse(l, p, y)
 		"""
 
 		lhs = [(1, [self.Transport.get_index_label(ll, l, p, tr, y)
@@ -1183,9 +1202,10 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product and region, the imports to that region
 		are the sum of the transport flows from locations outside that region
 		to locations in that region.
+		::
 
-		Import(r, p, y) == sum(sum(sum(Transport(ll, l, p, tr, y) * (1 - Geography(r, ll)) for tr in
-			[trm for trm in TRANSPORTMODE if TransportRoute(ll, l, p, trm, y) == 1]) for ll in
+			Import(r, p, y) == sum(sum(sum(Transport(ll, l, p, tr, y) * (1 - Geography(r, ll)) for tr in
+				[trm for trm in TRANSPORTMODE if TransportRoute(ll, l, p, trm, y) == 1]) for ll in
 													 LOCATION) * Geography(r, l) for l in LOCATION)
 		"""
 
@@ -1208,10 +1228,11 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product and region, the imports to that region
 		are the sum of the transport flows from locations outside that region
 		to locations in that region.
+		::
 
-		Export(r, p, y) == sum(sum(sum(
-			Transport(l, ll, p, tr, y) * (1 - Geography(r, ll)) for tr in [trm for trm in TRANSPORTMODE if
-			TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) * Geography(r, l) for l in LOCATION)
+			Export(r, p, y) == sum(sum(sum(
+				Transport(l, ll, p, tr, y) * (1 - Geography(r, ll)) for tr in [trm for trm in TRANSPORTMODE if
+				TransportRoute(l, ll, p, trm, y) == 1]) for ll in LOCATION) * Geography(r, l) for l in LOCATION)
 		"""
 
 		lhs = [(1, self.Export.get_index_label(r, p, y)),
@@ -1236,9 +1257,10 @@ class itom_hub_tinyomo(object):
 		be commissioned and available at the beginning of the year.
 		The investment expenditures are determined by the level of new capacity
 		invested in multiplied by a per-unit capital cost known to the analyst.
+		::
 
-		LocalCapitalInvestment(l, t, y) == sum(
-			CapitalCost(r, t, y) * Geography(r, l) for r in REGION) * LocalNewCapacity(l, t, y)
+			LocalCapitalInvestment(l, t, y) == sum(
+				CapitalCost(r, t, y) * Geography(r, l) for r in REGION) * LocalNewCapacity(l, t, y)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1260,8 +1282,9 @@ class itom_hub_tinyomo(object):
 		current time interval back to the first year of the first time interval
 		modeled. E.g. for y=2040 and 10 year time steps, investment cost is discounted
 		from 2036 back to 2016 (which is the same as from 2040 to 2020).
+		::
 
-		LocalDiscountedCapitalInvestment(l, t, y) == LocalCapitalInvestment(l, t, y) / ((1 + sum(
+			LocalDiscountedCapitalInvestment(l, t, y) == LocalCapitalInvestment(l, t, y) / ((1 + sum(
 				DiscountRate(r) * Geography(r, l) for r in REGION)) ** (y - min(YEAR)))
 		"""
 
@@ -1281,9 +1304,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the investments at each location are added to determine
 		the total regional investments in each technology.
+		::
 
-		DiscountedCapitalInvestment(r, t, y) == sum(LocalDiscountedCapitalInvestment(l, t, y) *
-			Geography(r, l) for l in RelevantLocation)
+			DiscountedCapitalInvestment(r, t, y) == sum(LocalDiscountedCapitalInvestment(l, t, y) *
+				Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -1304,16 +1328,18 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* salvage value is determined regionally, based on
 		the technology's operational life, its year of investment and discount rate.
+		::
 
-		SalvageValue(r, t, y) == CapitalCost(r, t, y) * NewCapacity(r, t, y) * (1 - (((1 + DiscountRate(r)) ** (
-						max(YEAR) + TimeStep(max(YEAR)) / 2 - (
+			SalvageValue(r, t, y) == CapitalCost(r, t, y) * NewCapacity(r, t, y) 
+				* (1 - (((1 + DiscountRate(r)) 
+					** (max(YEAR) + TimeStep(max(YEAR)) / 2 - (
 							y - TimeStep(y) / 2 + 1) + 1) - 1) / (
 											 (1 + DiscountRate(r)) ** OperationalLife[r, t] - 1)))
 
-		SalvageValue(r, t, y) == CapitalCost(r, t, y) * NewCapacity(r, t, y) * (1 - (max(YEAR) - y + 1) /
+			SalvageValue(r, t, y) == CapitalCost(r, t, y) * NewCapacity(r, t, y) * (1 - (max(YEAR) - y + 1) /
 															 OperationalLife(r, t))
 
-		SalvageValue(r, t, y) == 0
+			SalvageValue(r, t, y) == 0
 		"""
 
 		if (self.DepreciationMethod.get_value(r) == 1) and (
@@ -1358,8 +1384,9 @@ class itom_hub_tinyomo(object):
 		first year of the first time interval by a discount rate applied over
 		the modeling period, i.e. from the first year of the first interval
 		(min y - step/2 +1) and the last year of the last interval (max y + step/2).
+		::
 
-		DiscountedSalvageValue(r, t, y) == SalvageValue(r, t, y) / (
+			DiscountedSalvageValue(r, t, y) == SalvageValue(r, t, y) / (
 				(1 + DiscountRate(r)) ** (
 				1 + max(YEAR) + TimeStep(max(YEAR)) / 2 - (
 				min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
@@ -1381,9 +1408,10 @@ class itom_hub_tinyomo(object):
 		*Constraint*: for each location, technology, and year the variable cost
 		is a function of the rate of activity of each technology and a per-unit
 		cost defined by the analyst.
+		::
 
-		LocalVariableOperatingCost(l, t, y) == sum(LocalActivityByMode(l, t, m, y) * sum(
-					VariableCost(r, t, m, y) * Geography(r, l) for r in	REGION) for m in ModeOfOperation)
+			LocalVariableOperatingCost(l, t, y) == sum(LocalActivityByMode(l, t, m, y) * sum(
+				VariableCost(r, t, m, y) * Geography(r, l) for r in	REGION) for m in ModeOfOperation)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1406,8 +1434,9 @@ class itom_hub_tinyomo(object):
 		*Constraint*: for each location, technology, and year the annual fixed
 		operating cost is calculated by multiplying the total installed capacity
 		of a technology with a per-unit cost defined by the analyst.
+		::
 
-		LocalFixedOperatingCost(l, t, y) == LocalTotalCapacity(l, t, y) * sum(
+			LocalFixedOperatingCost(l, t, y) == LocalTotalCapacity(l, t, y) * sum(
 				FixedCost(r, t, y) * Geography(r, l) for r in REGION)
 		"""
 
@@ -1427,8 +1456,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the total annual operating cost is the sum of the fixed
 		and variable costs.
+		::
 
-		LocalOperatingCost(l, t, y) == LocalFixedOperatingCost(l, t, y) + LocalVariableOperatingCost(l, t, y)
+			LocalOperatingCost(l, t, y) == LocalFixedOperatingCost(l, t, y) + LocalVariableOperatingCost(l, t, y)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1448,10 +1478,11 @@ class itom_hub_tinyomo(object):
 		of the first interval modeled. That is done, using either a technology-specific
 		or a global discount rate applied to the middle of the interval in which
 		the costs are incurred.
+		::
 
-		LocalDiscountedOperatingCost(l, t, y) == LocalOperatingCost(l, t, y) / (
-							(1 + sum(DiscountRate(r) * Geography(r, l) for r in REGION)) ** (
-									1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
+			LocalDiscountedOperatingCost(l, t, y) == LocalOperatingCost(l, t, y) 
+				/ ((1 + sum(DiscountRate(r) * Geography(r, l) for r in REGION)) 
+					** (1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1474,9 +1505,10 @@ class itom_hub_tinyomo(object):
 		modeled. That is done, using either a technology-specific or a global
 		discount rate applied to the middle of the year in which the costs are
 		incurred.
+		::
 
-		DiscountedOperatingCost(r, t, y) == sum(LocalDiscountedOperatingCost(l, t, y) * Geography(r, l) for l in
-			RelevantLocation)
+			DiscountedOperatingCost(r, t, y) == sum(LocalDiscountedOperatingCost(l, t, y) 
+				* Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -1497,26 +1529,27 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each product, at each location, in each year, the total
 		cost of transporting the produced product FROM other locations (i.e. cost
 		of imports) is the sum of the quantities transported per mode of transport
-		multiplied by the specific costs of each mode of transport  per region.
-        Transport between regions occurs between the TRANSPORT_HUB locations. The transport
-        cost is defined for each region pair..
+		multiplied by the specific costs of each mode of transport  per region. 
+		Transport between regions occurs between the TRANSPORT_HUB locations. 
+		The transport cost is defined for each region pair.
+		::
 
-		if HubLocation[l]==0
-		LocalTransportCost(l, p, y) == sum(sum(Transport(ll, l, p, tr, y) * sum(
-				TransportCostByMode(r, tr, y) * Geography(r, l) for r in REGION) for tr
-				in [trm for trm in TRANSPORTMODE if TransportRoute[ll, l, p, trm, y] == 1]) for ll in LOCATION)
-
-		if HubLocation[l]==1
-		LocalTransportCost[l,p,y] == (sum(sum(Transport[ll,l,p,tr,y] * sum(
-				TransportCostByMode[r,tr,y] * Geography[r,l] for r in REGION) for tr
-				in [trm for trm in TRANSPORTMODE if TransportRoute[ll,l,p,trm,y]==1]) for ll in LOCATION)
-
-				+ sum(sum(sum(Transport[ll,l,p,tr,y] * sum(
+			if HubLocation[l]==0
+				LocalTransportCost(l, p, y) == sum(sum(Transport(ll, l, p, tr, y) * sum(
+					TransportCostByMode(r, tr, y) * Geography(r, l) for r in REGION) for tr
+					in [trm for trm in TRANSPORTMODE if TransportRoute[ll, l, p, trm, y] == 1]) for ll in LOCATION)
+			
+			if HubLocation[l]==1
+				LocalTransportCost[l,p,y] == (sum(sum(Transport[ll,l,p,tr,y] * sum(
+					TransportCostByMode[r,tr,y] * Geography[r,l] for r in REGION) for tr
+					in [trm for trm in TRANSPORTMODE if TransportRoute[ll,l,p,trm,y]==1]) for ll in LOCATION)
+					
+					+ sum(sum(sum(Transport[ll,l,p,tr,y] * sum(
 					TransportCostInterReg[rr,r,tr,y] * Geography[r,l] for r in REGION) * Geography[rr,ll] for rr in REGION)
 					for tr in [trm for trm in TRANSPORTMODE if TransportRoute[ll,l,p,trm,y]==1])
 					for ll in LOCATION if HubLocation[ll]==1))
-
 		"""
+
 		if self.HubLocation.get_value(l)==0:
 			lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
 
@@ -1567,10 +1600,11 @@ class itom_hub_tinyomo(object):
 		modeled. That is done, using either a technology-specific or a global
 		discount rate applied to the middle of the interval in which the costs are
 		incurred.
+		::
 
-		LocalDiscountedTransportCost(l, p, y) ==
-			LocalTransportCost(l, p, y) / ((1 + sum(DiscountRate(r) *
-						Geography(r, l) for r in REGION)) ** (1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
+			LocalDiscountedTransportCost(l, p, y) ==
+				LocalTransportCost(l, p, y) / ((1 + sum(DiscountRate(r) *
+					Geography(r, l) for r in REGION)) ** (1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
 		"""
 
 		lhs = [(1, self.LocalDiscountedTransportCost.get_index_label(l, p, y)),
@@ -1589,9 +1623,10 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each region, product and year, the total costs of transport
 		is the sum of the transport costs at each location. These transport costs
 		include both intra-regional transport AND imports from other regions.
+		::
 
-		DiscountedTransportCostByProduct(r, p, y) == sum(
-			LocalDiscountedTransportCost(l, p, y) * Geography(r, l) for l in LOCATION)
+			DiscountedTransportCostByProduct(r, p, y) == sum(
+				LocalDiscountedTransportCost(l, p, y) * Geography(r, l) for l in LOCATION)
 		"""
 
 		lhs = [(1, self.DiscountedTransportCostByProduct.get_index_label(r, p, y)),
@@ -1605,8 +1640,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each region and year, transport costs by product are added
 		to determine total transport costs towards and within this region.
+		::
 
-		DiscountedTransportCost(r, y) == sum(DiscountedTransportCostByProduct(r, p, y) for p in PRODUCT)
+			DiscountedTransportCost(r, y) == sum(DiscountedTransportCostByProduct(r, p, y) for p in PRODUCT)
 		"""
 
 		lhs = [(1, self.DiscountedTransportCost.get_index_label(r, y)),
@@ -1622,10 +1658,11 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each region and year, total discounted costs are the
 		sum for each technology of investment and operating costs, minus salvage
 		costs, to which transport costs for the region are added.
+		::
 
-		TotalDiscountedCost(r, y) == sum(DiscountedOperatingCost(r, t, y) + DiscountedCapitalInvestment(r, t, y) +
-			DiscountedTechnologyEmissionsPenalty(r, t, y) - DiscountedSalvageValue(r, t, y)
-			for t in TECHNOLOGY) + DiscountedTransportCost(r, y)
+			TotalDiscountedCost(r, y) == sum(DiscountedOperatingCost(r, t, y) + DiscountedCapitalInvestment(r, t, y) +
+				DiscountedTechnologyEmissionsPenalty(r, t, y) - DiscountedSalvageValue(r, t, y)
+					for t in TECHNOLOGY) + DiscountedTransportCost(r, y)
 		"""
 
 		lhs = [(1, self.TotalDiscountedCost.get_index_label(r, y)),
@@ -1643,8 +1680,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* total discounted costs are added for each year over the
 		modelling period.
+		::
 
-		ModelPeriodCostByRegion(r) == sum(TotalDiscountedCost(r, y) for y in YEAR)
+			ModelPeriodCostByRegion(r) == sum(TotalDiscountedCost(r, y) for y in YEAR)
 		"""
 
 		lhs = [(1, self.ModelPeriodCostByRegion.get_index_label(r)),
@@ -1656,8 +1694,9 @@ class itom_hub_tinyomo(object):
 	def TDC3_ModelPeriodCost_rule(self):
 		"""
 		*Constraint:* discounted model period costs are added for each region.
+		::
 
-	 	ModelPeriodCost == sum(ModelPeriodCostByRegion(r) for r in REGION)
+		 	ModelPeriodCost == sum(ModelPeriodCostByRegion(r) for r in REGION)
 		"""
 
 		lhs = [(1, self.ModelPeriodCost.get_index_label()),
@@ -1672,8 +1711,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* there can be a maximum limit on the total capacity of a
 		particular technology allowed in a particular year and region.
+		::
 
-		TotalCapacity(r, t, y) <= TotalAnnualMaxCapacity(r, t, y)
+			TotalCapacity(r, t, y) <= TotalAnnualMaxCapacity(r, t, y)
 		"""
 
 		if self.TotalAnnualMaxCapacity.get_value(r, t, y) != self.HighMaxDefault:
@@ -1688,8 +1728,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* there can be a mainimu limit on the total capacity of a
 		particular technology allowed in a particular year and region.
+		::
 
-		TotalCapacity(r, t, y) >= TotalAnnualMinCapacity(r, t, y)
+			TotalCapacity(r, t, y) >= TotalAnnualMinCapacity(r, t, y)
 		"""
 
 		if self.TotalAnnualMinCapacity.get_value(r, t, y) != 0:
@@ -1706,8 +1747,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* there can be a maximum new capacity investment limit placed
 		on a particular technology per year and region.
+		::
 
-		LocalNewCapacity(l, t, y) <= LocalTotalAnnualMaxCapacityInvestment(l, t, y)
+			LocalNewCapacity(l, t, y) <= LocalTotalAnnualMaxCapacityInvestment(l, t, y)
 		"""
 		if self.LocalTotalAnnualMaxCapacityInvestment.get_value(l, t, y) != self.HighMaxDefault:
 			if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1725,8 +1767,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* there can be a minimum new capacity investment limit placed
 		on a particular technology per year and region.
+		::
 
-		LocalNewCapacity(l, t, y) >= LocalTotalAnnualMinCapacityInvestment(l, t, y)
+			LocalNewCapacity(l, t, y) >= LocalTotalAnnualMinCapacityInvestment(l, t, y)
 		"""
 
 		if self.LocalTotalAnnualMinCapacityInvestment.get_value(l, t, y) != 0:
@@ -1747,8 +1790,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the total activity of a technology for each year in a location
 		is the sum of the local activities by mode of operation.
+		::
 
-		LocalActivity(l, t, y) == sum(LocalActivityByMode(l, t, m, y) for m in ModeOfOperation)
+			LocalActivity(l, t, y) == sum(LocalActivityByMode(l, t, m, y) for m in ModeOfOperation)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1767,8 +1811,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* the total activity of a technology for each year in a region
 		is the sum of the local activities in that region.
+		::
 
-		Activity(r, t, y) == sum(LocalActivity(l, t, y) * Geography(r, l) for l in RelevantLocation)
+			Activity(r, t, y) == sum(LocalActivity(l, t, y) * Geography(r, l) for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -1786,8 +1831,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* where specified, a maximum annual limit may be placed
 		on the annual activity of a technology in a region.
+		::
 
-		Activity(r, t, y) <= TotalTechnologyAnnualActivityUpperLimit(r,t,y)
+			Activity(r, t, y) <= TotalTechnologyAnnualActivityUpperLimit(r,t,y)
 		"""
 
 		if self.TotalTechnologyAnnualActivityUpperLimit.get_value(r, t, y) != self.HighMaxDefault:
@@ -1802,8 +1848,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* where specified, a minimum annual limit may be placed
 		on the annual activity of a technology in a region.
+		::
 
-		Activity(r, t, y) >= TotalTechnologyAnnualActivityLowerLimit(r,t,y)
+			Activity(r, t, y) >= TotalTechnologyAnnualActivityLowerLimit(r,t,y)
 		"""
 
 		if self.TotalTechnologyAnnualActivityLowerLimit.get_value(r, t, y) != 0:
@@ -1829,8 +1876,9 @@ class itom_hub_tinyomo(object):
 		*Constraint:* the model period activity of each technology is obtained
 		by summing the total annual activity of each technology for each year
 		for each region.
+		::
 
-		ModelPeriodActivity(r, t) == sum(Activity(r, t, y) for y in YEAR)
+			ModelPeriodActivity(r, t) == sum(Activity(r, t, y) for y in YEAR)
 		"""
 
 		lhs = [(1, self.ModelPeriodActivity.get_index_label(r, t)),
@@ -1843,8 +1891,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* where specified, a maximum limit may be placed on the
 		model period activity of a technology.
+		::
 
-		ModelPeriodActivity(r, t) <= TotalTechnologyModelPeriodActivityUpperLimit(r, t)
+			ModelPeriodActivity(r, t) <= TotalTechnologyModelPeriodActivityUpperLimit(r, t)
 		"""
 
 		if self.TotalTechnologyModelPeriodActivityUpperLimit.get_value(r, t) != self.HighMaxDefault:
@@ -1859,8 +1908,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* where specified, a minimum limit may be placed on the
 		model period activity of a technology.
+		::
 
-		ModelPeriodActivity(r, t) >= TotalTechnologyModelPeriodActivityLowerLimit(r, t)
+			ModelPeriodActivity(r, t) >= TotalTechnologyModelPeriodActivityLowerLimit(r, t)
 		"""
 
 		if self.TotalTechnologyModelPeriodActivityLowerLimit.get_value(r, t) != 0:
@@ -1878,13 +1928,12 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each location, technology, emission type, operation mode
 		and year the emission quantity is a function of the rate of activity of
 		each technology and a per-unit emission factor defined by the analyst.
+		::
 
+			LocalTechnologyEmissionByMode(l, t, e, m, y) == LocalActivityByMode(l, t, m, y) * sum(
+				EmissionActivityRatio(r, t, e, m, y) * Geography(r, l) for r in REGION)
 
-		LocalTechnologyEmissionByMode(l, t, e, m, y) == LocalActivityByMode(l, t, m, y) * sum(
-							EmissionActivityRatio(r, t, e, m, y) * Geography(r, l) for r
-							in REGION)
-
-		LocalTechnologyEmissionByMode(l, t, e, m, y) == 0
+			LocalTechnologyEmissionByMode(l, t, e, m, y) == 0
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1913,10 +1962,11 @@ class itom_hub_tinyomo(object):
 
 	def E2_LocalEmissionProduction_rule(self, l, t, e, y):
 		"""
-		*Constraint: for each location, technology, emission type, and year total
-		emissions are the sum of emissions in each operation mode.*
+		*Constraint:* for each location, technology, emission type, and year total
+		emissions are the sum of emissions in each operation mode.
+		::
 
-		LocalTechnologyEmission(l, t, e, y) == sum(LocalTechnologyEmissionByMode(l, t, e, m, y) for m in ModeOfOperation)
+			LocalTechnologyEmission(l, t, e, y) == sum(LocalTechnologyEmissionByMode(l, t, e, m, y) for m in ModeOfOperation)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1935,9 +1985,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each region, technology, emission type, and year total
 		emissions are the sum of emissions in each location.
+		::
 
-		AnnualTechnologyEmission(r, t, e, y) == sum(LocalTechnologyEmission(l, t, e, y) * Geography(r, l) for l in
-			RelevantLocation)
+			AnnualTechnologyEmission(r, t, e, y) == sum(LocalTechnologyEmission(l, t, e, y) * Geography(r, l) 
+				for l in RelevantLocation)
 		"""
 
 		if self.HubTechnology.get_value(t) == 1:
@@ -1955,9 +2006,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each region, technology, emission type, and year there is
 		an emission penalty associated with the quantity of emissions.
+		::
 
-		AnnualTechnologyEmissionPenaltyByEmission(r, t, e, y) == AnnualTechnologyEmission(r, t, e, y) *
-			EmissionsPenalty(r, e, y)
+			AnnualTechnologyEmissionPenaltyByEmission(r, t, e, y) == AnnualTechnologyEmission(r, t, e, y) *
+				EmissionsPenalty(r, e, y)
 		"""
 
 		lhs = [(1, self.AnnualTechnologyEmissionPenaltyByEmission.get_index_label(r, t, e, y)),
@@ -1971,9 +2023,10 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each location, technology, and year the total emission
 		penalty is the sum of emission penalties for each emission type.
+		::
 
-		AnnualTechnologyEmissionsPenalty(r, t, y) == sum(AnnualTechnologyEmissionPenaltyByEmission(r, t, e, y) for e in
-			EMISSION)
+			AnnualTechnologyEmissionsPenalty(r, t, y) == sum(AnnualTechnologyEmissionPenaltyByEmission(r, t, e, y) 
+				for e in EMISSION)
 		"""
 
 		lhs = [(1, self.AnnualTechnologyEmissionsPenalty.get_index_label(r, t, y)),
@@ -1989,9 +2042,10 @@ class itom_hub_tinyomo(object):
 		modeled. That is done, using either a technology-specific or a global
 		discount rate applied to the middle of the interval in which the costs are
 		incurred.
+		::
 
-		DiscountedTechnologyEmissionsPenalty(r, t, y) == AnnualTechnologyEmissionsPenalty(r, t, y) /
-			((1 + DiscountRate(r)) ** (1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
+			DiscountedTechnologyEmissionsPenalty(r, t, y) == AnnualTechnologyEmissionsPenalty(r, t, y) /
+				((1 + DiscountRate(r)) ** (1 + y - (min(YEAR) - TimeStep(min(YEAR)) / 2 + 1)))
 		"""
 
 		lhs = [(1, self.DiscountedTechnologyEmissionsPenalty.get_index_label(r, t, y)),
@@ -2007,8 +2061,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each region, emission type, and year total emissions
 		are the sum of emissions from each technology.
+		::
 
-		AnnualEmissions(r, e, y) == sum(AnnualTechnologyEmission(r, t, e, y) for t in TECHNOLOGY)
+			AnnualEmissions(r, e, y) == sum(AnnualTechnologyEmission(r, t, e, y) for t in TECHNOLOGY)
 		"""
 		lhs = [(1, self.AnnualEmissions.get_index_label(r, e, y)),
 			   (-1, [self.AnnualTechnologyEmission.get_index_label(r, t, e, y) for t in self.TECHNOLOGY.data.VALUE])]
@@ -2021,8 +2076,9 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each region and emission type total emissions over the
 		whole modelling period is the sum of all technology emissions plus
 		exogenous emissions entered by the analyst.
+		::
 
-		ModelPeriodEmissions(r, e) == sum(AnnualEmissions(r, e, y) for y in	YEAR) + ModelPeriodExogenousEmission(r, e)
+			ModelPeriodEmissions(r, e) == sum(AnnualEmissions(r, e, y) for y in	YEAR) + ModelPeriodExogenousEmission(r, e)
 		"""
 
 		lhs = [(1, self.ModelPeriodEmissions.get_index_label(r, e)),
@@ -2035,8 +2091,9 @@ class itom_hub_tinyomo(object):
 		"""
 		*Constraint:* for each region, emission type, and year total emissions
 		should be lower than the emission limit entered by the analyst.
+		::
 
-		AnnualEmissions(r, e, y) + AnnualExogenousEmission(r, e, y) <= AnnualEmissionLimit(r, e, y)
+			AnnualEmissions(r, e, y) + AnnualExogenousEmission(r, e, y) <= AnnualEmissionLimit(r, e, y)
 		"""
 
 		if self.AnnualEmissionLimit.get_value(r, e, y) != self.HighMaxDefault:
@@ -2052,8 +2109,9 @@ class itom_hub_tinyomo(object):
 		*Constraint:* for each region and emission type total emissions over the
 		whole emission period should be lower than the emission limit entered by
 		the analyst.
+		::
 
-		ModelPeriodEmissions(r, e) <= ModelPeriodEmissionLimit(r, e)
+			ModelPeriodEmissions(r, e) <= ModelPeriodEmissionLimit(r, e)
 		"""
 
 		if self.ModelPeriodEmissionLimit.get_value(r, e) != self.HighMaxDefault:
