@@ -817,7 +817,7 @@ class itom_hub_tinyomo(object):
 
 			LocalActivity(l, t, y) <= LocalTotalCapacity(l, t, y) * sum(
 				AvailabilityFactor(r, t, y) * CapacityToActivityUnit(r, t) 
-				\* Geography.(r, l) for r in REGION)
+				* Geography.(r, l) for r in REGION)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -844,7 +844,7 @@ class itom_hub_tinyomo(object):
 			LocalProductionByMode.(l, t, p, m, y) == 
 				LocalActivityByMode(l, t, m, y) * sum(
 				OutputActivityRatio(r, t, p, m, y) 
-				\* Geography(r, l) for r in REGION)
+				* Geography(r, l) for r in REGION)
 		"""
 
 		if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
@@ -1101,14 +1101,14 @@ class itom_hub_tinyomo(object):
 
 		    (sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
 		    <= 1 / len(RELEVANT_PRODUCT_to_ll)
-		    \* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-		    \* TransportCapacityToActivity(tr))
+		    * sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+		    * TransportCapacityToActivity(tr))
 
 		    (sum(Transport(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
 			+ sum(Transport(ll, l, p, tr, y) for p in RELEVANT_PRODUCT_from_ll)
 			<= 1 / len(RELEVANT_PRODUCT_to_ll)
-			\* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
-			\* TransportCapacityToActivity(tr))
+			* sum(TransportCapacity(l, ll, p, tr, y) for p in RELEVANT_PRODUCT_to_ll)
+			* TransportCapacityToActivity(tr))
 		"""
 
 		if self.MultiPurposeTransport.get_value(tr) == 1:
