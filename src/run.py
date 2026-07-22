@@ -236,6 +236,20 @@ if args.scope in ['all', 'build_lp', 'solve_lp', 'build_and_solve_lp']:
                 print('Building abstract model: WITH retrofit, WITH transport hub, WITH impurities')
                 m = itom_hub_retrofit_impurities_tinyomo(InputPath=input_path, OutputPath=output_path, config=config) # Build LP file
 
+            ## PARAYOMO PROJECT
+            t2 = time.time()
+            import datetime
+            with open(os.path.join(os.path.abspath(os.pardir), 'parayomo_log.txt'), 'a') as logfile:
+                print('\n{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), file=logfile)
+                print('ORIGINAL TINYOMO', file=logfile)
+                print('scenario: ' + config['model_run_code'], file=logfile)
+                print('Building ABSTRACT model:  ' + str(t2-t1) + ' seconds', file=logfile)
+                print(f"Nb of params: {len(m.AllParams.all)}", file=logfile)
+                print(f"1st param: {m.AllParams.all[0]}", file=logfile)
+                print(f"last param: {m.AllParams.all[-1]}\n", file=logfile)
+            import sys
+            sys.exit(0)
+            ##
 
             if config['framework']['tinyomo']:
                 m.build_lp() # Build LP file
