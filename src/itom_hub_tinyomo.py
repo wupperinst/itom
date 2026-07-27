@@ -653,7 +653,27 @@ class itom_hub_tinyomo(object):
 		Write info about all variables (x-names, human-readable names, index etc.)
 		'''
 		write_objective(self.OBJ, self.OutputPath)
+
+		## PARAYOMO PROJECT
+		import time
+		t1 = time.time()
+		##
+
 		write_constraints(self.AllCons, self.AllVars, shadow=self.config['solver']['shadow_prices'])
+
+		## PARAYOMO PROJECT
+		import time
+		t2 = time.time()
+		import datetime
+		with open(os.path.join(os.path.abspath(os.pardir), 'parayomo_log.txt'), 'a') as logfile:
+			print('\n{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()), file=logfile)
+			print('ORIGINAL TINYOMO', file=logfile)
+			print('scenario: ' + self.config['model_run_code'], file=logfile)
+			print('Writing CONSTRAINTS:  ' + str(t2-t1) + ' seconds\n', file=logfile)
+		import sys
+		sys.exit(0)
+		##
+
 		write_bounds(self.AllVars)
 		write_lp(self.OutputPath, keep_files=True)
 

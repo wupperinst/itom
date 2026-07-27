@@ -249,8 +249,6 @@ if __name__ == '__main__':
                     print(f"Nb of params: {len(m.AllParams.all)}", file=logfile)
                     print(f"1st param: {m.AllParams.all[0]}", file=logfile)
                     print(f"last param: {m.AllParams.all[-1]}\n", file=logfile)
-                import sys
-                sys.exit(0)
                 ##
 
                 if config['framework']['tinyomo']:

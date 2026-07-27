@@ -247,8 +247,6 @@ if args.scope in ['all', 'build_lp', 'solve_lp', 'build_and_solve_lp']:
                 print(f"Nb of params: {len(m.AllParams.all)}", file=logfile)
                 print(f"1st param: {m.AllParams.all[0]}", file=logfile)
                 print(f"last param: {m.AllParams.all[-1]}\n", file=logfile)
-            import sys
-            sys.exit(0)
             ##
          
 
