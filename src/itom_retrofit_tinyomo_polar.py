@@ -94,7 +94,7 @@ class itom_hub_retrofit_tinyomo_polar(itom_hub_tinyomo_polar):
 
 			PotentialRetrofitFromResidual(l, t, y) == 0
 		"""
-		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data.VALUE)) or (self.TechnologyToRetrofit.get_value(t) == 0):
+		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data['VALUE'])) or (self.TechnologyToRetrofit.get_value(t) == 0):
 			return None
 		else:
 			if self.LocalResidualCapacity.get_value(l, t, y - self.TimeStep.get_value(y)) - self.LocalResidualCapacity.get_value(
@@ -122,12 +122,12 @@ class itom_hub_retrofit_tinyomo_polar(itom_hub_tinyomo_polar):
 				OperationalLife(r, t) * Geography(r, l) for r in REGION)) and (y - yy > 0))
 		"""
 
-		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data.VALUE)) or (self.TechnologyToRetrofit.get_value(t) == 0):
+		if (self.HubLocation.get_value(l) == 1) or (y == min(self.YEAR.data['VALUE'])) or (self.TechnologyToRetrofit.get_value(t) == 0):
 			return None
 		else:
 			lhs =  [(1, self.PotentialRetrofitFromNew.get_index_label(l, t, y)),
-					(-1, [self.LocalNewCapacity.get_index_label(l, t, yy) for yy in self.YEAR.data.VALUE if (y - yy == sum(
-					self.OperationalLife.get_value(r, t) * self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)) and (
+					(-1, [self.LocalNewCapacity.get_index_label(l, t, yy) for yy in self.YEAR.data['VALUE'] if (y - yy == sum(
+					self.OperationalLife.get_value(r, t) * self.Geography.get_value(r, l) for r in self.REGION.data['VALUE'])) and (
 							y - yy > 0)])]
 			rhs = 0
 			sense = '=='
@@ -150,19 +150,23 @@ class itom_hub_retrofit_tinyomo_polar(itom_hub_tinyomo_polar):
 		if (self.HubLocation.get_value(l) == 1) or (self.RetrofitTechnology.get_value(t) == 0):
 			return None
 		else:
-			if y == min(self.YEAR.data.VALUE):
+			if y == min(self.YEAR.data['VALUE']):
 				lhs = [(1, self.LocalNewCapacity.get_index_label(l, t, y))]
 				rhs = 0
 				sense = '=='
 				return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
 			else:
-				RelevantTechnology = [tech for tech in self.TECHNOLOGY.data.VALUE if
+				RelevantTechnology = [tech for tech in self.TECHNOLOGY.data['VALUE'] if
 									  self.MatchTechnologyRetrofit.get_value(tech, t) == 1]
-				OtherRetrofitTechnology = [tech for tech in self.TECHNOLOGY.data.VALUE if
+				OtherRetrofitTechnology = [tech for tech in self.TECHNOLOGY.data['VALUE'] if
 										   (self.RetrofitTechnology.get_value(tech) == 1) and (sum(
 											   self.MatchTechnologyRetrofit.get_value(tt, tech) for tt in
 											   RelevantTechnology) >= 1)]
-				OtherRetrofitTechnology.remove(t)
+				try:
+					OtherRetrofitTechnology.remove(t)
+				except ValueError:
+					pass
+				#OtherRetrofitTechnology.remove(t)
 
 				lhs = [(1, self.LocalNewCapacity.get_index_label(l, t, y)),
 						(1, [self.LocalNewCapacity.get_index_label(l, tech, y) for tech in OtherRetrofitTechnology]),

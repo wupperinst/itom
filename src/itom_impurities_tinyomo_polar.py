@@ -78,7 +78,7 @@ class itom_hub_retrofit_impurities_tinyomo_polar(itom_hub_retrofit_tinyomo_polar
 		"""
 
 		if self.ProductFromTechnology.get_value(t, i) == 1:
-			RelevantProduct = [p for p in self.PRODUCT.data.VALUE if
+			RelevantProduct = [p for p in self.PRODUCT.data['VALUE'] if
 							   (p != i) and (self.ProductFromTechnology.get_value(t, p) == 1)]
 			if RelevantProduct:
 				for p in RelevantProduct:

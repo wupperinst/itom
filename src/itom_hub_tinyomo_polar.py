@@ -708,7 +708,7 @@ class itom_hub_tinyomo_polar(object):
             sum(ModelPeriodCostByRegion(r) for r in REGION)
         """
 
-        obj = [(1, [self.ModelPeriodCostByRegion.get_index_label(r) for r in self.REGION.data.VALUE])]
+        obj = [(1, [self.ModelPeriodCostByRegion.get_index_label(r) for r in self.REGION.data['VALUE']])]
         return obj
 
     ###############
@@ -727,9 +727,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
 
         lhs = [(1, self.NewCapacity.get_index_label(r, t, y)),
                (-1, [self.LocalNewCapacity.get_index_label(l, t, y) for l in RelevantLocation
@@ -754,9 +754,9 @@ class itom_hub_tinyomo_polar(object):
                 ((self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             lhs = [(1, self.LocalAccumulatedNewCapacity.get_index_label(l, t, y)),
                    (-1,
-                    [self.LocalNewCapacity.get_index_label(l, t, yy) for yy in self.YEAR.data.VALUE if ((y - yy < sum(
+                    [self.LocalNewCapacity.get_index_label(l, t, yy) for yy in self.YEAR.data['VALUE'] if ((y - yy < sum(
                         self.OperationalLife.get_value(r, t) * self.Geography.get_value(r, l) for r in
-                        self.REGION.data.VALUE)) and (y - yy >= 0))])]
+                        self.REGION.data['VALUE'])) and (y - yy >= 0))])]
             rhs = 0
             sense = '=='
             return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -773,9 +773,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
         lhs = [(1, self.AccumulatedNewCapacity.get_index_label(r, t, y)),
                (-1, [self.LocalAccumulatedNewCapacity.get_index_label(l, t, y) for l in RelevantLocation
                      if self.Geography.get_value(r, l) == 1])]
@@ -816,9 +816,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
         lhs = [(1, self.TotalCapacity.get_index_label(r, t, y)),
                (-1, [self.LocalTotalCapacity.get_index_label(l, t, y) for l in RelevantLocation
                      if self.Geography.get_value(r, l) == 1])]
@@ -844,7 +844,7 @@ class itom_hub_tinyomo_polar(object):
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             lhs = [(1, self.LocalActivity.get_index_label(l, t, y)),
                    (-1 * sum(self.AvailabilityFactor.get_value(r, t, y) * self.CapacityToActivityUnit.get_value(r, t) *
-                             self.Geography.get_value(r, l) for r in self.REGION.data.VALUE),
+                             self.Geography.get_value(r, l) for r in self.REGION.data['VALUE']),
                     self.LocalTotalCapacity.get_index_label(l, t, y))]
             rhs = 0
             sense = '<='
@@ -872,7 +872,7 @@ class itom_hub_tinyomo_polar(object):
             if self.ModeForTechnology.get_value(t, m) == 1 and self.ProductFromTechnology.get_value(t, p) == 1:
                 lhs = [(1, self.LocalProductionByMode.get_index_label(l, t, p, m, y)),
                        (-1 * sum(self.OutputActivityRatio.get_value(r, t, p, m, y) *
-                                 self.Geography.get_value(r, l) for r in self.REGION.data.VALUE),
+                                 self.Geography.get_value(r, l) for r in self.REGION.data['VALUE']),
                         self.LocalActivityByMode.get_index_label(l, t, m, y))]
                 rhs = 0
                 sense = '=='
@@ -894,7 +894,7 @@ class itom_hub_tinyomo_polar(object):
 
         if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
-            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data.VALUE if
+            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data['VALUE'] if
                                self.ModeForTechnology.get_value(t, m) == 1]
             if self.ProductFromTechnology.get_value(t, p) == 1:
                 lhs = [(1, self.LocalProductionByTechnology.get_index_label(l, t, p, y)),
@@ -919,9 +919,9 @@ class itom_hub_tinyomo_polar(object):
         '''
 
         if self.HubLocation.get_value(l) == 1:
-            RelevantTechnology = [t for t in self.TECHNOLOGY.data.VALUE if self.HubTechnology.get_value(t) == 1]
+            RelevantTechnology = [t for t in self.TECHNOLOGY.data['VALUE'] if self.HubTechnology.get_value(t) == 1]
         elif self.HubLocation.get_value(l) == 0:
-            RelevantTechnology = [t for t in self.TECHNOLOGY.data.VALUE if self.HubTechnology.get_value(t) == 0]
+            RelevantTechnology = [t for t in self.TECHNOLOGY.data['VALUE'] if self.HubTechnology.get_value(t) == 0]
         RelevantTechnology = [t for t in RelevantTechnology if self.ProductFromTechnology.get_value(t, p) == 1]
         lhs = [(1, self.LocalProduction.get_index_label(l, p, y)),
                (-1, [self.LocalProductionByTechnology.get_index_label(l, t, p, y) for t in RelevantTechnology])]
@@ -941,8 +941,8 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.Production.get_index_label(r, p, y)),
-               ([-1 * self.Geography.get_value(r, l) for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l)==0],
-                [self.LocalProduction.get_index_label(l, p, y) for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l)==0])]
+               ([-1 * self.Geography.get_value(r, l) for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l)==0],
+                [self.LocalProduction.get_index_label(l, p, y) for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l)==0])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -953,7 +953,7 @@ class itom_hub_tinyomo_polar(object):
     #        location is added to determine the total regional production of
     #        each product by technology.
     #        '''
-    #        return self.ProductionByTechnology[r,t,p,y] == sum(self.LocalProductionByTechnology[l,t,p,y] * self.Geography[r,l] for l in self.LOCATION.data.VALUE)
+    #        return self.ProductionByTechnology[r,t,p,y] == sum(self.LocalProductionByTechnology[l,t,p,y] * self.Geography[r,l] for l in self.LOCATION.data['VALUE'])
 
     def PB5_Use_1_rule(self, l, p, t, m, y):
         """
@@ -972,7 +972,7 @@ class itom_hub_tinyomo_polar(object):
                 lhs = [(1, self.LocalUseByMode.get_index_label(l, t, p, m, y)),
                        (-1 * sum(
                            self.InputActivityRatio.get_value(r, t, p, m, y) * self.Geography.get_value(r, l) for r in
-                           self.REGION.data.VALUE), self.LocalActivityByMode.get_index_label(l, t, m, y))]
+                           self.REGION.data['VALUE']), self.LocalActivityByMode.get_index_label(l, t, m, y))]
                 rhs = 0
                 sense = '=='
                 return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -993,7 +993,7 @@ class itom_hub_tinyomo_polar(object):
 
         if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
-            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data.VALUE if
+            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data['VALUE'] if
                                self.ModeForTechnology.get_value(t, m) == 1]
             if self.ProductToTechnology.get_value(t, p) == 1:
                 lhs = [(1, self.LocalUseByTechnology.get_index_label(l, t, p, y)),
@@ -1016,9 +1016,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubLocation.get_value(l) == 1:
-            RelevantTechnology = [t for t in self.TECHNOLOGY.data.VALUE if self.HubTechnology.get_value(t) == 1]
+            RelevantTechnology = [t for t in self.TECHNOLOGY.data['VALUE'] if self.HubTechnology.get_value(t) == 1]
         elif self.HubLocation.get_value(l) == 0:
-            RelevantTechnology = [t for t in self.TECHNOLOGY.data.VALUE if self.HubTechnology.get_value(t) == 0]
+            RelevantTechnology = [t for t in self.TECHNOLOGY.data['VALUE'] if self.HubTechnology.get_value(t) == 0]
         RelevantTechnology = [t for t in RelevantTechnology if self.ProductToTechnology.get_value(t, p) == 1]
 
         lhs = [(1, self.LocalUse.get_index_label(l, p, y)),
@@ -1037,8 +1037,8 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.Use.get_index_label(r, p, y)),
-               ([-1 * self.Geography.get_value(r, l) for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l)==0],
-                [self.LocalUse.get_index_label(l, p, y) for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l)==0])]
+               ([-1 * self.Geography.get_value(r, l) for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l)==0],
+                [self.LocalUse.get_index_label(l, p, y) for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l)==0])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1132,9 +1132,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.MultiPurposeTransport.get_value(tr) == 1:
-            RELEVANT_PRODUCT_to_ll = [p for p in self.PRODUCT.data.VALUE if
+            RELEVANT_PRODUCT_to_ll = [p for p in self.PRODUCT.data['VALUE'] if
                                       self.TransportRoute.get_value(l, ll, p, tr, y) == 1]
-            RELEVANT_PRODUCT_from_ll = [p for p in self.PRODUCT.data.VALUE if
+            RELEVANT_PRODUCT_from_ll = [p for p in self.PRODUCT.data['VALUE'] if
                                         self.TransportRoute.get_value(ll, l, p, tr, y) == 1]
             if RELEVANT_PRODUCT_to_ll == [] and RELEVANT_PRODUCT_from_ll == []:
                 return None
@@ -1180,16 +1180,16 @@ class itom_hub_tinyomo_polar(object):
 
         if self.HubLocation.get_value(l) == 0:
             self.TransportRoute.get_value(l, 'DELTA_DEMAND', p, 'ONSITE', y)
-            lhs = [(1, [self.Transport.get_index_label(l, ll, p, tr, y) for ll in self.LOCATION.data.VALUE
-                        for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE if
+            lhs = [(1, [self.Transport.get_index_label(l, ll, p, tr, y) for ll in self.LOCATION.data['VALUE']
+                        for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE'] if
                                    self.TransportRoute.get_value(l, ll, p, trm, y) == 1]]),
                    (-1, self.LocalProduction.get_index_label(l, p, y))]
             rhs = 0
             sense = '<='
             return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
         else:
-            lhs = [(1, [self.Transport.get_index_label(l, ll, p, tr, y) for ll in self.LOCATION.data.VALUE
-                        for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE if
+            lhs = [(1, [self.Transport.get_index_label(l, ll, p, tr, y) for ll in self.LOCATION.data['VALUE']
+                        for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE'] if
                                    self.TransportRoute.get_value(l, ll, p, trm, y) == 1]]),
                    (-1, self.LocalProduction.get_index_label(l, p, y))]
             rhs = 0
@@ -1209,8 +1209,8 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, [self.Transport.get_index_label(ll, l, p, tr, y)
-                    for ll in self.LOCATION.data.VALUE
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                    for ll in self.LOCATION.data['VALUE']
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
                (-1, self.LocalUse.get_index_label(l, p, y))]
         rhs = 0
@@ -1233,10 +1233,10 @@ class itom_hub_tinyomo_polar(object):
 
                (-1,
                 [self.Transport.get_index_label(ll, l, p, tr, y)
-                 for ll in [loc for loc in self.LOCATION.data.VALUE if self.Geography.get_value(r, loc) == 0]
-                 for l in [loc for loc in self.LOCATION.data.VALUE if self.Geography.get_value(r, loc) == 1]
+                 for ll in [loc for loc in self.LOCATION.data['VALUE'] if self.Geography.get_value(r, loc) == 0]
+                 for l in [loc for loc in self.LOCATION.data['VALUE'] if self.Geography.get_value(r, loc) == 1]
                  for tr in
-                 [trm for trm in self.TRANSPORTMODE.data.VALUE if
+                 [trm for trm in self.TRANSPORTMODE.data['VALUE'] if
                   self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
 
         rhs = 0
@@ -1259,10 +1259,10 @@ class itom_hub_tinyomo_polar(object):
 
                (-1,
                 [self.Transport.get_index_label(l, ll, p, tr, y)
-                 for l in [loc for loc in self.LOCATION.data.VALUE if self.Geography.get_value(r, loc) == 1]
-                 for ll in [loc for loc in self.LOCATION.data.VALUE if self.Geography.get_value(r, loc) == 0]
+                 for l in [loc for loc in self.LOCATION.data['VALUE'] if self.Geography.get_value(r, loc) == 1]
+                 for ll in [loc for loc in self.LOCATION.data['VALUE'] if self.Geography.get_value(r, loc) == 0]
                  for tr in
-                 [trm for trm in self.TRANSPORTMODE.data.VALUE if
+                 [trm for trm in self.TRANSPORTMODE.data['VALUE'] if
                   self.TransportRoute.get_value(l, ll, p, trm, y) == 1]])]
         rhs = 0
         sense = '=='
@@ -1288,7 +1288,7 @@ class itom_hub_tinyomo_polar(object):
 
             lhs = [(1, self.LocalCapitalInvestment.get_index_label(l, t, y)),
                    (-1 * sum(self.CapitalCost.get_value(r, t, y) * self.Geography.get_value(r, l) for r in
-                             self.REGION.data.VALUE),
+                             self.REGION.data['VALUE']),
                     self.LocalNewCapacity.get_index_label(l, t, y))]
             rhs = 0
             sense = '=='
@@ -1312,7 +1312,7 @@ class itom_hub_tinyomo_polar(object):
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             lhs = [(1, self.LocalDiscountedCapitalInvestment.get_index_label(l, t, y)),
                    (-1 / ((1 + sum(self.DiscountRate.get_value(r) * self.Geography.get_value(r, l)
-                                   for r in self.REGION.data.VALUE)) ** (y - min(self.YEAR.data.VALUE))),
+                                   for r in self.REGION.data['VALUE'])) ** (y - min(self.YEAR.data['VALUE']))),
                     self.LocalCapitalInvestment.get_index_label(l, t, y))]
             rhs = 0
             sense = '=='
@@ -1331,9 +1331,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
 
         lhs = [(1, self.DiscountedCapitalInvestment.get_index_label(r, t, y)),
                (-1, [self.LocalDiscountedCapitalInvestment.get_index_label(l, t, y) for l in RelevantLocation
@@ -1364,11 +1364,11 @@ class itom_hub_tinyomo_polar(object):
 
         if (self.DepreciationMethod.get_value(r) == 1) and (
                 (y + self.TimeStep.get_value(y) / 2 + self.OperationalLife.get_value(r, t) - 1) > (
-                max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE)) / 2)) and (
+                max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE'])) / 2)) and (
                 self.DiscountRate.get_value(r) > 0):
             lhs = [(1, self.SalvageValue.get_index_label(r, t, y)),
                    (-1 * self.CapitalCost.get_value(r, t, y) * (1 - (((1 + self.DiscountRate.get_value(r)) ** (
-                           max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE)) / 2 - (
+                           max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE'])) / 2 - (
                            y - self.TimeStep.get_value(y) / 2 + 1) + 1) - 1) / (
                                                                              (1 + self.DiscountRate.get_value(r)) **
                                                                              self.OperationalLife.get_value(r,
@@ -1380,13 +1380,13 @@ class itom_hub_tinyomo_polar(object):
 
         elif (self.DepreciationMethod.get_value(r) == 1 and (
                 (y + self.TimeStep.get_value(y) / 2 + self.OperationalLife.get_value(r, t) - 1) > (
-                max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE)) / 2)) and
+                max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE'])) / 2)) and
               self.DiscountRate.get_value(r) == 0) or (self.DepreciationMethod.get_value(r) == 2 and (
                 (y + self.TimeStep.get_value(y) / 2 + self.OperationalLife.get_value(r, t) - 1) > (
-                max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE)) / 2))):
+                max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE'])) / 2))):
 
             lhs = [(1, self.SalvageValue.get_index_label(r, t, y)),
-                   (-1 * self.CapitalCost.get_value(r, t, y) * (1 - (max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE))/2 - (y - self.TimeStep.get_value(y)/2 +1) + 1) /
+                   (-1 * self.CapitalCost.get_value(r, t, y) * (1 - (max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE']))/2 - (y - self.TimeStep.get_value(y)/2 +1) + 1) /
                                                                 self.OperationalLife.get_value(r, t)),
                     self.SalvageValue.get_index_label(r, t, y))]
             rhs = 0
@@ -1414,8 +1414,8 @@ class itom_hub_tinyomo_polar(object):
 
         lhs = [(1, self.DiscountedSalvageValue.get_index_label(r, t, y)),
                (-1 / ((1 + self.DiscountRate.get_value(r)) ** (
-                       1 + max(self.YEAR.data.VALUE) + self.TimeStep.get_value(max(self.YEAR.data.VALUE)) / 2 - (
-                       min(self.YEAR.data.VALUE) - self.TimeStep.get_value(min(self.YEAR.data.VALUE)) / 2 + 1))),
+                       1 + max(self.YEAR.data['VALUE']) + self.TimeStep.get_value(max(self.YEAR.data['VALUE'])) / 2 - (
+                       min(self.YEAR.data['VALUE']) - self.TimeStep.get_value(min(self.YEAR.data['VALUE'])) / 2 + 1))),
                 self.SalvageValue.get_index_label(r, t, y))]
         rhs = 0
         sense = '=='
@@ -1436,12 +1436,12 @@ class itom_hub_tinyomo_polar(object):
 
         if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
-            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data.VALUE if
+            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data['VALUE'] if
                                self.ModeForTechnology.get_value(t, m) == 1]
 
             lhs = [(1, self.LocalVariableOperatingCost.get_index_label(l, t, y)),
                    ([-1 * sum(self.VariableCost.get_value(r, t, m, y) * self.Geography.get_value(r, l)
-                              for r in self.REGION.data.VALUE) for m in ModeOfOperation],
+                              for r in self.REGION.data['VALUE']) for m in ModeOfOperation],
                     [self.LocalActivityByMode.get_index_label(l, t, m, y) for m in ModeOfOperation])]
             rhs = 0
             sense = '=='
@@ -1464,7 +1464,7 @@ class itom_hub_tinyomo_polar(object):
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             lhs = [(1, self.LocalFixedOperatingCost.get_index_label(l, t, y)),
                    (-1 * sum(self.FixedCost.get_value(r, t, y) * self.Geography.get_value(r, l) for r in
-                             self.REGION.data.VALUE),
+                             self.REGION.data['VALUE']),
                     self.LocalTotalCapacity.get_index_label(l, t, y))]
             rhs = 0
             sense = '=='
@@ -1509,9 +1509,9 @@ class itom_hub_tinyomo_polar(object):
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             lhs = [(1, self.LocalDiscountedOperatingCost.get_index_label(l, t, y)),
                    (-1 / ((1 + sum(self.DiscountRate.get_value(r) * self.Geography.get_value(r, l)
-                                   for r in self.REGION.data.VALUE)) ** (
-                                  1 + y - (min(self.YEAR.data.VALUE) - self.TimeStep.get_value(
-                              min(self.YEAR.data.VALUE)) / 2 + 1))),
+                                   for r in self.REGION.data['VALUE'])) ** (
+                                  1 + y - (min(self.YEAR.data['VALUE']) - self.TimeStep.get_value(
+                              min(self.YEAR.data['VALUE'])) / 2 + 1))),
                     self.LocalOperatingCost.get_index_label(l, t, y))]
             rhs = 0
             sense = '=='
@@ -1532,9 +1532,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
         lhs = [(1, self.DiscountedOperatingCost.get_index_label(r, t, y)),
                (-1, [self.LocalDiscountedOperatingCost.get_index_label(l, t, y) for l in RelevantLocation
                      if self.Geography.get_value(r, l) == 1])]
@@ -1574,14 +1574,14 @@ class itom_hub_tinyomo_polar(object):
             lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
 
                 ([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
-                            * self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-                    for ll in self.LOCATION.data.VALUE
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                            * self.Geography.get_value(r, l) for r in self.REGION.data['VALUE'])
+                    for ll in self.LOCATION.data['VALUE']
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
                     [self.Transport.get_index_label(ll, l, p, tr, y)
-                    for ll in self.LOCATION.data.VALUE
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                    for ll in self.LOCATION.data['VALUE']
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
             rhs = 0
             sense = '=='
@@ -1589,26 +1589,26 @@ class itom_hub_tinyomo_polar(object):
             lhs = [(1, self.LocalTransportCost.get_index_label(l, p, y)),
 
                 ([-1 * sum(self.TransportCostByMode.get_value(r, tr, y)
-                            * self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-                    for ll in self.LOCATION.data.VALUE
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                            * self.Geography.get_value(r, l) for r in self.REGION.data['VALUE'])
+                    for ll in self.LOCATION.data['VALUE']
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
                     [self.Transport.get_index_label(ll, l, p, tr, y)
-                    for ll in self.LOCATION.data.VALUE
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                    for ll in self.LOCATION.data['VALUE']
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]]),
 
                 ([-1 * sum(sum(self.TransportCostInterReg.get_value(rr, r, tr, y)
-                            * self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)
-                            * self.Geography.get_value(rr, ll) for rr in self.REGION.data.VALUE)
-                    for ll in self.LOCATION.data.VALUE  if self.HubLocation.get_value(ll)==1
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                            * self.Geography.get_value(r, l) for r in self.REGION.data['VALUE'])
+                            * self.Geography.get_value(rr, ll) for rr in self.REGION.data['VALUE'])
+                    for ll in self.LOCATION.data['VALUE']  if self.HubLocation.get_value(ll)==1
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]],
 
                     [self.Transport.get_index_label(ll, l, p, tr, y)
-                    for ll in self.LOCATION.data.VALUE if self.HubLocation.get_value(ll)==1
-                    for tr in [trm for trm in self.TRANSPORTMODE.data.VALUE
+                    for ll in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(ll)==1
+                    for tr in [trm for trm in self.TRANSPORTMODE.data['VALUE']
                                 if self.TransportRoute.get_value(ll, l, p, trm, y) == 1]])]
             rhs = 0
             sense = '=='
@@ -1629,10 +1629,10 @@ class itom_hub_tinyomo_polar(object):
 
         lhs = [(1, self.LocalDiscountedTransportCost.get_index_label(l, p, y)),
                (-1 / ((1 + sum(self.DiscountRate.get_value(r) *
-                               self.Geography.get_value(r, l) for r in self.REGION.data.VALUE)) ** (
-                              1 + y - (min(self.YEAR.data.VALUE) -
+                               self.Geography.get_value(r, l) for r in self.REGION.data['VALUE'])) ** (
+                              1 + y - (min(self.YEAR.data['VALUE']) -
                                        self.TimeStep.get_value(
-                                           min(self.YEAR.data.VALUE)) / 2 + 1))),
+                                           min(self.YEAR.data['VALUE'])) / 2 + 1))),
                 self.LocalTransportCost.get_index_label(l, p, y))]
         rhs = 0
         sense = '=='
@@ -1650,7 +1650,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.DiscountedTransportCostByProduct.get_index_label(r, p, y)),
-               (-1, [self.LocalDiscountedTransportCost.get_index_label(l, p, y) for l in self.LOCATION.data.VALUE
+               (-1, [self.LocalDiscountedTransportCost.get_index_label(l, p, y) for l in self.LOCATION.data['VALUE']
                      if self.Geography.get_value(r, l) == 1])]
         rhs = 0
         sense = '=='
@@ -1666,7 +1666,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.DiscountedTransportCost.get_index_label(r, y)),
-               (-1, [self.DiscountedTransportCostByProduct.get_index_label(r, p, y) for p in self.PRODUCT.data.VALUE])]
+               (-1, [self.DiscountedTransportCostByProduct.get_index_label(r, p, y) for p in self.PRODUCT.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1686,11 +1686,11 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.TotalDiscountedCost.get_index_label(r, y)),
-               (-1, [self.DiscountedOperatingCost.get_index_label(r, t, y) for t in self.TECHNOLOGY.data.VALUE]),
-               (-1, [self.DiscountedCapitalInvestment.get_index_label(r, t, y) for t in self.TECHNOLOGY.data.VALUE]),
+               (-1, [self.DiscountedOperatingCost.get_index_label(r, t, y) for t in self.TECHNOLOGY.data['VALUE']]),
+               (-1, [self.DiscountedCapitalInvestment.get_index_label(r, t, y) for t in self.TECHNOLOGY.data['VALUE']]),
                (-1, [self.DiscountedTechnologyEmissionsPenalty.get_index_label(r, t, y) for t in
-                     self.TECHNOLOGY.data.VALUE]),
-               (1, [self.DiscountedSalvageValue.get_index_label(r, t, y) for t in self.TECHNOLOGY.data.VALUE]),
+                     self.TECHNOLOGY.data['VALUE']]),
+               (1, [self.DiscountedSalvageValue.get_index_label(r, t, y) for t in self.TECHNOLOGY.data['VALUE']]),
                (-1, self.DiscountedTransportCost.get_index_label(r, y))]
         rhs = 0
         sense = '=='
@@ -1706,7 +1706,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.ModelPeriodCostByRegion.get_index_label(r)),
-               (-1, [self.TotalDiscountedCost.get_index_label(r, y) for y in self.YEAR.data.VALUE])]
+               (-1, [self.TotalDiscountedCost.get_index_label(r, y) for y in self.YEAR.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1720,7 +1720,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.ModelPeriodCost.get_index_label()),
-               (-1, [self.ModelPeriodCostByRegion.get_index_label(r) for r in self.REGION.data.VALUE])]
+               (-1, [self.ModelPeriodCostByRegion.get_index_label(r) for r in self.REGION.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1817,7 +1817,7 @@ class itom_hub_tinyomo_polar(object):
 
         if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
-            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data.VALUE if
+            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data['VALUE'] if
                                self.ModeForTechnology.get_value(t, m) == 1]
             lhs = [(1, self.LocalActivity.get_index_label(l, t, y)),
                    (-1, [self.LocalActivityByMode.get_index_label(l, t, m, y) for m in ModeOfOperation])]
@@ -1837,9 +1837,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
         lhs = [(1, self.Activity.get_index_label(r, t, y)),
                ([-1 * self.Geography.get_value(r, l) for l in RelevantLocation],
                 [self.LocalActivity.get_index_label(l, t, y) for l in RelevantLocation])]
@@ -1902,7 +1902,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.ModelPeriodActivity.get_index_label(r, t)),
-               (-1, [self.Activity.get_index_label(r, t, y) for y in self.YEAR.data.VALUE])]
+               (-1, [self.Activity.get_index_label(r, t, y) for y in self.YEAR.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -1960,10 +1960,10 @@ class itom_hub_tinyomo_polar(object):
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
             if self.ModeForTechnology.get_value(t, m) == 1:
                 if sum(self.EmissionActivityRatio.get_value(r, t, e, m, y) * self.Geography.get_value(r, l) for r in
-                       self.REGION.data.VALUE) != 0:
+                       self.REGION.data['VALUE']) != 0:
                     lhs = [(1, self.LocalTechnologyEmissionByMode.get_index_label(l, t, e, m, y)),
                            (-1 * sum(self.EmissionActivityRatio.get_value(r, t, e, m, y) *
-                                     self.Geography.get_value(r, l) for r in self.REGION.data.VALUE),
+                                     self.Geography.get_value(r, l) for r in self.REGION.data['VALUE']),
                             self.LocalActivityByMode.get_index_label(l, t, m, y))]
                     rhs = 0
                     sense = '=='
@@ -1991,7 +1991,7 @@ class itom_hub_tinyomo_polar(object):
 
         if ((self.HubLocation.get_value(l) == 1) and (self.HubTechnology.get_value(t) == 1)) or (
                 (self.HubLocation.get_value(l) == 0) and (self.HubTechnology.get_value(t) == 0)):
-            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data.VALUE if
+            ModeOfOperation = [m for m in self.MODE_OF_OPERATION.data['VALUE'] if
                                self.ModeForTechnology.get_value(t, m) == 1]
             lhs = [(1, self.LocalTechnologyEmission.get_index_label(l, t, e, y)),
                    (-1, [self.LocalTechnologyEmissionByMode.get_index_label(l, t, e, m, y) for m in ModeOfOperation])]
@@ -2012,9 +2012,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         if self.HubTechnology.get_value(t) == 1:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 1]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 1]
         elif self.HubTechnology.get_value(t) == 0:
-            RelevantLocation = [l for l in self.LOCATION.data.VALUE if self.HubLocation.get_value(l) == 0]
+            RelevantLocation = [l for l in self.LOCATION.data['VALUE'] if self.HubLocation.get_value(l) == 0]
         lhs = [(1, self.AnnualTechnologyEmission.get_index_label(r, t, e, y)),
                (-1, [self.LocalTechnologyEmission.get_index_label(l, t, e, y) for l in RelevantLocation
                      if self.Geography.get_value(r, l) == 1])]
@@ -2051,7 +2051,7 @@ class itom_hub_tinyomo_polar(object):
 
         lhs = [(1, self.AnnualTechnologyEmissionsPenalty.get_index_label(r, t, y)),
                (-1, [self.AnnualTechnologyEmissionPenaltyByEmission.get_index_label(r, t, e, y) for e in
-                     self.EMISSION.data.VALUE])]
+                     self.EMISSION.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -2069,9 +2069,9 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.DiscountedTechnologyEmissionsPenalty.get_index_label(r, t, y)),
-               (-1 / ((1 + self.DiscountRate.get_value(r)) ** (1 + y - (min(self.YEAR.data.VALUE) -
+               (-1 / ((1 + self.DiscountRate.get_value(r)) ** (1 + y - (min(self.YEAR.data['VALUE']) -
                                                                         self.TimeStep.get_value(
-                                                                            min(self.YEAR.data.VALUE)) / 2 + 1))),
+                                                                            min(self.YEAR.data['VALUE'])) / 2 + 1))),
                 self.AnnualTechnologyEmissionsPenalty.get_index_label(r, t, y))]
         rhs = 0
         sense = '=='
@@ -2086,7 +2086,7 @@ class itom_hub_tinyomo_polar(object):
             AnnualEmissions(r, e, y) == sum(AnnualTechnologyEmission(r, t, e, y) for t in TECHNOLOGY)
         """
         lhs = [(1, self.AnnualEmissions.get_index_label(r, e, y)),
-               (-1, [self.AnnualTechnologyEmission.get_index_label(r, t, e, y) for t in self.TECHNOLOGY.data.VALUE])]
+               (-1, [self.AnnualTechnologyEmission.get_index_label(r, t, e, y) for t in self.TECHNOLOGY.data['VALUE']])]
         rhs = 0
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
@@ -2102,7 +2102,7 @@ class itom_hub_tinyomo_polar(object):
         """
 
         lhs = [(1, self.ModelPeriodEmissions.get_index_label(r, e)),
-               (-1, [self.AnnualEmissions.get_index_label(r, e, y) for y in self.YEAR.data.VALUE])]
+               (-1, [self.AnnualEmissions.get_index_label(r, e, y) for y in self.YEAR.data['VALUE']])]
         rhs = self.ModelPeriodExogenousEmission.get_value(r, e)
         sense = '=='
         return {'lhs': lhs, 'rhs': rhs, 'sense': sense}
